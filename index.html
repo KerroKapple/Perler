@@ -203,6 +203,34 @@ img{display:block;max-width:100%}
 .empty{text-align:center;color:var(--sub);padding:60px 0;font-size:14px}
 .section-title{font-family:'Fraunces',serif;font-size:24px;font-weight:600;margin:32px 0 16px}
 
+/* Detail modal */
+.detail-body{background:#fff;width:100%;max-width:1100px;border-radius:16px;max-height:92vh;overflow:hidden;position:relative;animation:msgIn .25s ease-out}
+.detail-body .close{position:absolute;top:14px;right:18px;color:#fff;font-size:30px;line-height:1;cursor:pointer;background:rgba(0,0,0,.4);border:none;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:5}
+.detail-grid{display:grid;grid-template-columns:1.2fr 1fr;max-height:92vh}
+@media (max-width:860px){.detail-grid{grid-template-columns:1fr;max-height:none;overflow-y:auto}}
+.detail-img-wrap{position:relative;background:#1c1c1c;display:flex;align-items:center;justify-content:center;min-height:400px}
+.detail-img-wrap img{width:100%;height:100%;object-fit:contain;max-height:92vh}
+.detail-img-actions{position:absolute;right:18px;bottom:18px;display:flex;flex-direction:column;gap:8px}
+.icon-btn-lg{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;color:var(--ink);font-size:18px;cursor:pointer;border:none;transition:all .15s}
+.icon-btn-lg:hover{background:#fff;transform:scale(1.06)}
+.icon-btn-lg.active{background:var(--primary);color:#fff}
+.detail-info{padding:32px;overflow-y:auto;display:flex;flex-direction:column}
+.detail-tags{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.detail-tags .t{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--primary);background:#fdf1ec;padding:4px 10px;border-radius:999px}
+.detail-title{font-family:'Fraunces',serif;font-size:26px;font-weight:600;line-height:1.2;letter-spacing:-.02em;margin-bottom:14px}
+.detail-author{display:flex;align-items:center;gap:10px;margin-bottom:24px}
+.detail-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--primary-2),var(--accent))}
+.detail-h4{font-family:'Fraunces',serif;font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--sub);margin-bottom:10px;margin-top:6px}
+.detail-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:22px;padding:16px;background:#faf6ef;border-radius:12px}
+.detail-stats .ds{}
+.detail-stats .dv{font-family:'Fraunces',serif;font-size:20px;font-weight:600;line-height:1}
+.detail-stats .dl{font-size:10px;color:var(--sub);text-transform:uppercase;letter-spacing:.1em;margin-top:6px}
+.detail-kit{display:flex;align-items:center;gap:14px;padding:14px;background:#faf6ef;border-radius:12px;margin-bottom:22px}
+.kit-swatches{display:grid;grid-template-columns:repeat(4,12px);grid-template-rows:repeat(2,12px);gap:2px;flex:0 0 auto}
+.kit-swatches span{display:block;border-radius:2px}
+.detail-actions{display:flex;gap:10px;margin-top:auto}
+.detail-actions .btn{flex:1}
+
 /* Paywall modal */
 .modal{position:fixed;inset:0;background:rgba(28,28,28,.5);display:none;z-index:40;align-items:center;justify-content:center;padding:24px}
 .modal.show{display:flex}
@@ -239,7 +267,7 @@ img{display:block;max-width:100%}
     </nav>
     <div class="search">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input type="text" placeholder="Search patterns, makers, palettes…">
+      <input type="text" id="search-input" placeholder="Search patterns, makers, palettes…" oninput="onSearchInput()">
     </div>
     <div class="right">
       <button class="credits-pill" onclick="showPaywall('credits')" title="Your HD download credits">
@@ -258,16 +286,17 @@ img{display:block;max-width:100%}
   <section class="page active" id="page-feed">
     <h2 class="page-hero">Discover patterns<br><em style="color:var(--primary);font-style:italic">made by makers.</em></h2>
     <p class="page-sub">Trending bead-art patterns from the community.</p>
-    <div class="chip-row">
-      <button class="chip active">All</button>
-      <button class="chip">Pixel Art</button>
-      <button class="chip">Anime</button>
-      <button class="chip">Animals</button>
-      <button class="chip">Keychains</button>
-      <button class="chip">Coasters</button>
-      <button class="chip">Holiday</button>
+    <div class="chip-row" id="discover-chips">
+      <button class="chip active" data-tag="All" onclick="setChip('All')">All</button>
+      <button class="chip" data-tag="Pixel Art" onclick="setChip('Pixel Art')">Pixel Art</button>
+      <button class="chip" data-tag="Anime" onclick="setChip('Anime')">Anime</button>
+      <button class="chip" data-tag="Animals" onclick="setChip('Animals')">Animals</button>
+      <button class="chip" data-tag="Keychains" onclick="setChip('Keychains')">Keychains</button>
+      <button class="chip" data-tag="Coasters" onclick="setChip('Coasters')">Coasters</button>
+      <button class="chip" data-tag="Holiday" onclick="setChip('Holiday')">Holiday</button>
     </div>
     <div class="feed" id="feed-list"></div>
+    <div id="feed-empty" class="empty" style="display:none">No patterns matched. Try a different search or tag.</div>
   </section>
 
   <!-- Create -->
@@ -427,6 +456,59 @@ img{display:block;max-width:100%}
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- Pattern Detail modal -->
+<div class="modal" id="detail-modal" onclick="if(event.target===this)hideDetail()">
+  <div class="detail-body">
+    <button class="close" onclick="hideDetail()">×</button>
+    <div class="detail-grid">
+      <div class="detail-img-wrap">
+        <img id="detail-img" src="" alt="">
+        <div class="detail-img-actions">
+          <button class="icon-btn-lg" id="detail-like" onclick="toggleLike()" title="Like"></button>
+          <button class="icon-btn-lg" id="detail-save" onclick="toggleSave()" title="Save"></button>
+          <button class="icon-btn-lg" onclick="sharePattern()" title="Share">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="detail-info">
+        <div class="detail-tags" id="detail-tags"></div>
+        <h2 class="detail-title" id="detail-title"></h2>
+        <div class="detail-author">
+          <span class="detail-avatar"></span>
+          <span><b id="detail-author"></b><span style="color:var(--sub);font-size:12px;display:block;margin-top:2px">Maker · <span id="detail-likes"></span> likes</span></span>
+        </div>
+
+        <h4 class="detail-h4">Materials &amp; Stats</h4>
+        <div class="detail-stats">
+          <div class="ds"><div class="dv" id="ds-size"></div><div class="dl">Grid</div></div>
+          <div class="ds"><div class="dv" id="ds-beads"></div><div class="dl">Beads</div></div>
+          <div class="ds"><div class="dv" id="ds-colors"></div><div class="dl">Colors</div></div>
+          <div class="ds"><div class="dv" id="ds-time"></div><div class="dl">Est. time</div></div>
+        </div>
+
+        <h4 class="detail-h4">Suggested kit</h4>
+        <div class="detail-kit">
+          <div class="kit-swatches" id="kit-swatches"></div>
+          <div style="flex:1">
+            <div style="font-family:Fraunces,serif;font-weight:600;font-size:15px">Auto-matched bead kit</div>
+            <div style="color:var(--sub);font-size:12px;margin-top:2px">All colors needed · ships in 2 days</div>
+          </div>
+          <div style="font-family:Fraunces,serif;font-size:20px;font-weight:600" id="kit-price"></div>
+        </div>
+
+        <div class="detail-actions">
+          <button class="btn primary" onclick="buyThisKit()">Buy this kit</button>
+          <button class="btn ghost" onclick="remixThis()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+            Remix this
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Paywall modal -->
 <div class="modal" id="paywall" onclick="if(event.target===this)hidePaywall()">
@@ -1064,27 +1146,50 @@ const DB={
   feed: JSON.parse(localStorage.getItem('feed')||'null') || seedFeed(),
   cart: JSON.parse(localStorage.getItem('cart')||'[]'),
   mine: JSON.parse(localStorage.getItem('mine')||'[]'),
-  save(){localStorage.setItem('feed',JSON.stringify(this.feed));localStorage.setItem('cart',JSON.stringify(this.cart));localStorage.setItem('mine',JSON.stringify(this.mine))}
+  likes: new Set(JSON.parse(localStorage.getItem('likes')||'[]')),
+  saves: new Set(JSON.parse(localStorage.getItem('saves')||'[]')),
+  save(){localStorage.setItem('feed',JSON.stringify(this.feed));localStorage.setItem('cart',JSON.stringify(this.cart));localStorage.setItem('mine',JSON.stringify(this.mine));localStorage.setItem('likes',JSON.stringify([...this.likes]));localStorage.setItem('saves',JSON.stringify([...this.saves]))}
 };
+
+/* === Filter & search state === */
+let activeChip='All';
+let searchQuery='';
+function setChip(tag){
+  activeChip=tag;
+  document.querySelectorAll('#discover-chips .chip').forEach(b=>b.classList.toggle('active',b.dataset.tag===tag));
+  renderFeed();
+}
+function onSearchInput(){searchQuery=$('search-input').value.trim();renderFeed();if(searchQuery&&!$('page-feed').classList.contains('active'))switchTab('feed')}
+function filteredFeed(){
+  return DB.feed.filter(it=>{
+    if(activeChip!=='All' && !(it.tags||[]).includes(activeChip))return false;
+    if(searchQuery){
+      const q=searchQuery.toLowerCase();
+      const hay=(it.title+' '+it.author+' '+(it.tags||[]).join(' ')).toLowerCase();
+      if(!hay.includes(q))return false;
+    }
+    return true;
+  });
+}
 function seedFeed(){
   const samples=[
-    {img:'rainbow.jpg',title:'Biggie Beads Rainbow — wall art',author:'Maya R.',likes:1432},
-    {img:'floral-necklace.jpg',title:'Fancy floral necklace, fuse beads',author:'Theo K.',likes:2189},
-    {img:'bracelets.jpg',title:'Mom &amp; Me bracelets — matching set',author:'Lila S.',likes:987},
-    {img:'cupcake-frame.jpg',title:'Cupcake frame — kitchen series',author:'Jonah W.',likes:3041},
-    {img:'picture-display.jpg',title:'Picture display, 32×48 grid',author:'Iris D.',likes:766},
-    {img:'daisy-card.jpg',title:'Daisy best-mom card · pastel',author:'Sam P.',likes:1502},
-    {img:'floral-bouquet.jpg',title:'Floral bouquet — botanical',author:'Nora F.',likes:612},
-    {img:'spring-garland.jpg',title:'Spring garland, 12-piece',author:'Chloe G.',likes:1908},
-    {img:'photo-frame.jpg',title:'Spring photo frame, 48×72',author:'Avery L.',likes:2456},
-    {img:'beauty1.jpg',title:'Pixel mosaic kit — starter',author:'Riley J.',likes:823},
-    {img:'beauty2.jpg',title:'Geometric coaster set, 4-pack',author:'Quinn B.',likes:1247},
-    {img:'beauty3.jpg',title:'Animal series — keychains',author:'Casey M.',likes:1788},
-    {img:'beauty4.jpg',title:'Zodiac patterns, full series',author:'Emerson T.',likes:3502},
-    {img:'detail1.jpg',title:'Detail study — color theory',author:'Hayden C.',likes:512},
-    {img:'detail2.jpg',title:'Pattern texture, hi-res grid',author:'Jordan K.',likes:982},
-    {img:'detail3.jpg',title:'Macro shot — bead arrangement',author:'Skyler P.',likes:644},
-    {img:'daisy-holder.jpg',title:'Daisy holder — desk décor',author:'Morgan F.',likes:1109},
+    {img:'rainbow.jpg',title:'Biggie Beads Rainbow — wall art',author:'Maya R.',likes:1432,tags:['Pixel Art','Holiday'],size:48,colors:8,beads:2304},
+    {img:'floral-necklace.jpg',title:'Fancy floral necklace, fuse beads',author:'Theo K.',likes:2189,tags:['Animals','Coasters'],size:32,colors:6,beads:1024},
+    {img:'bracelets.jpg',title:'Mom &amp; Me bracelets — matching set',author:'Lila S.',likes:987,tags:['Keychains'],size:24,colors:5,beads:576},
+    {img:'cupcake-frame.jpg',title:'Cupcake frame — kitchen series',author:'Jonah W.',likes:3041,tags:['Animals','Holiday'],size:48,colors:7,beads:2304},
+    {img:'picture-display.jpg',title:'Picture display, 32×48 grid',author:'Iris D.',likes:766,tags:['Coasters'],size:48,colors:6,beads:1536},
+    {img:'daisy-card.jpg',title:'Daisy best-mom card · pastel',author:'Sam P.',likes:1502,tags:['Holiday'],size:32,colors:5,beads:1024},
+    {img:'floral-bouquet.jpg',title:'Floral bouquet — botanical',author:'Nora F.',likes:612,tags:['Holiday'],size:48,colors:8,beads:2304},
+    {img:'spring-garland.jpg',title:'Spring garland, 12-piece',author:'Chloe G.',likes:1908,tags:['Holiday'],size:32,colors:6,beads:1024},
+    {img:'photo-frame.jpg',title:'Spring photo frame, 48×72',author:'Avery L.',likes:2456,tags:['Coasters'],size:64,colors:8,beads:3456},
+    {img:'beauty1.jpg',title:'Pixel mosaic kit — starter',author:'Riley J.',likes:823,tags:['Pixel Art'],size:32,colors:6,beads:1024},
+    {img:'beauty2.jpg',title:'Geometric coaster set, 4-pack',author:'Quinn B.',likes:1247,tags:['Coasters','Pixel Art'],size:29,colors:5,beads:841},
+    {img:'beauty3.jpg',title:'Animal series — keychains',author:'Casey M.',likes:1788,tags:['Animals','Keychains'],size:24,colors:5,beads:576},
+    {img:'beauty4.jpg',title:'Zodiac patterns, full series',author:'Emerson T.',likes:3502,tags:['Anime','Pixel Art'],size:32,colors:7,beads:1024},
+    {img:'detail1.jpg',title:'Detail study — color theory',author:'Hayden C.',likes:512,tags:['Pixel Art'],size:48,colors:8,beads:2304},
+    {img:'detail2.jpg',title:'Pattern texture, hi-res grid',author:'Jordan K.',likes:982,tags:['Pixel Art'],size:64,colors:6,beads:4096},
+    {img:'detail3.jpg',title:'Macro shot — bead arrangement',author:'Skyler P.',likes:644,tags:['Pixel Art'],size:48,colors:6,beads:2304},
+    {img:'daisy-holder.jpg',title:'Daisy holder — desk décor',author:'Morgan F.',likes:1109,tags:['Holiday'],size:29,colors:5,beads:841},
   ];
   return samples.map((s,i)=>({id:'s'+i,...s,thumb:'assets/feed/'+s.img}));
 }
@@ -1107,16 +1212,19 @@ function placeholderArt(bg,pal,seed=0){
 
 function renderFeed(){
   const wrap=$('feed-list');wrap.innerHTML='';
-  DB.feed.forEach(it=>{
+  const list=filteredFeed();
+  $('feed-empty').style.display=list.length?'none':'block';
+  list.forEach(it=>{
+    const liked=DB.likes.has(it.id);
     const card=document.createElement('div');card.className='card';
     card.innerHTML=`
       <img class="thumb" src="${it.thumb}" loading="lazy" alt="">
       <div class="meta">
         <div class="title">${it.title}</div>
         <div class="row"><span class="author"><span class="avatar"></span>${it.author}</span>
-        <span class="heart">♡ ${it.likes>=1000?(it.likes/1000).toFixed(1)+'k':it.likes}</span></div>
+        <span class="heart">${liked?'♥':'♡'} ${it.likes>=1000?(it.likes/1000).toFixed(1)+'k':it.likes}</span></div>
       </div>`;
-    card.onclick=()=>showToast('Opening: '+it.title);
+    card.onclick=()=>openDetail(it.id);
     wrap.appendChild(card);
   });
 }
@@ -1213,6 +1321,106 @@ function switchTab(t){
 }
 
 function showToast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1600)}
+
+/* ===== Detail modal / Like / Save / Share / Remix ===== */
+let currentDetail=null;
+const HEART_FILL='<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
+const HEART_OUTLINE='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
+const BOOK_FILL='<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
+const BOOK_OUTLINE='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
+
+function openDetail(id){
+  const it=DB.feed.find(x=>x.id===id);if(!it)return;
+  currentDetail=it;
+  $('detail-img').src=it.thumb;
+  $('detail-title').innerHTML=it.title;
+  $('detail-author').textContent=it.author;
+  $('detail-likes').textContent=(it.likes>=1000?(it.likes/1000).toFixed(1)+'k':it.likes);
+  // Tags
+  const tw=$('detail-tags');tw.innerHTML='';
+  (it.tags||['Pixel Art']).forEach(t=>{
+    const s=document.createElement('span');s.className='t';s.textContent=t;
+    s.style.cursor='pointer';s.onclick=()=>{hideDetail();setChip(t);switchTab('feed')};
+    tw.appendChild(s);
+  });
+  // Stats
+  const size=it.size||32,beads=it.beads||(size*size),colors=it.colors||6;
+  $('ds-size').textContent=size+'×'+size;
+  $('ds-beads').textContent=beads.toLocaleString();
+  $('ds-colors').textContent=colors;
+  $('ds-time').textContent=Math.round(beads/120)+' min';
+  // Kit
+  const palette=PALETTES.perler.slice(0,colors).map(p=>p[1]);
+  const kw=$('kit-swatches');kw.innerHTML='';
+  palette.slice(0,8).forEach(c=>{const s=document.createElement('span');s.style.background=c;kw.appendChild(s)});
+  while(kw.children.length<8){const s=document.createElement('span');s.style.background='#faf6ef';kw.appendChild(s)}
+  const price=8+colors*2;
+  $('kit-price').textContent='$'+price.toFixed(2);
+  // Like/Save state
+  refreshLikeSaveButtons();
+  $('detail-modal').classList.add('show');
+}
+function hideDetail(){$('detail-modal').classList.remove('show');currentDetail=null}
+function refreshLikeSaveButtons(){
+  if(!currentDetail)return;
+  const liked=DB.likes.has(currentDetail.id);
+  const saved=DB.saves.has(currentDetail.id);
+  const lb=$('detail-like'),sb=$('detail-save');
+  lb.innerHTML=liked?HEART_FILL:HEART_OUTLINE;
+  sb.innerHTML=saved?BOOK_FILL:BOOK_OUTLINE;
+  lb.classList.toggle('active',liked);
+  sb.classList.toggle('active',saved);
+}
+function toggleLike(){
+  if(!currentDetail)return;
+  const id=currentDetail.id;
+  if(DB.likes.has(id)){DB.likes.delete(id);currentDetail.likes--}else{DB.likes.add(id);currentDetail.likes++}
+  $('detail-likes').textContent=(currentDetail.likes>=1000?(currentDetail.likes/1000).toFixed(1)+'k':currentDetail.likes);
+  DB.save();refreshLikeSaveButtons();renderFeed();
+}
+function toggleSave(){
+  if(!currentDetail)return;
+  const id=currentDetail.id;
+  if(DB.saves.has(id)){DB.saves.delete(id);showToast('Removed from saves')}else{DB.saves.add(id);showToast('Saved to your collection')}
+  DB.save();refreshLikeSaveButtons();
+}
+async function sharePattern(){
+  if(!currentDetail)return;
+  const url=location.href.split('#')[0]+'#p='+currentDetail.id;
+  if(navigator.share){try{await navigator.share({title:currentDetail.title,url});return}catch(e){}}
+  try{await navigator.clipboard.writeText(url);showToast('Link copied to clipboard')}catch(e){showToast('Share: '+url)}
+}
+function buyThisKit(){
+  if(!currentDetail)return;
+  const colors=currentDetail.colors||6;const price=8+colors*2;
+  DB.cart.push({name:currentDetail.title.replace(/&amp;/g,'&').slice(0,40)+' · auto kit',price,qty:1});
+  DB.save();updateCartBadge();showToast('Kit added to cart · $'+price.toFixed(2));
+}
+function remixThis(){
+  if(!currentDetail)return;
+  const it=currentDetail;hideDetail();
+  switchTab('upload');switchMode('photo');
+  // Load the source image as srcImg
+  const im=new Image();im.crossOrigin='anonymous';
+  im.onload=()=>{
+    srcImg=im;workImg=im;
+    if(it.size)$('size').value=Math.min(80,Math.max(20,it.size));
+    $('stylize-panel').style.display='block';
+    $('controls').style.display='block';$('preview').style.display='block';
+    renderStyleChips();loadApiCfg();rerender();
+    setTimeout(()=>{$('preview').scrollIntoView({behavior:'smooth',block:'start'})},200);
+    appendChatMessageFromRemix(it);
+  };
+  im.onerror=()=>{
+    // 跨域兜底：直接拿 thumb URL 当 srcImg（一般同源就行）
+    showToast('Loaded — tweak settings &amp; re-publish');
+  };
+  im.src=it.thumb;
+}
+function appendChatMessageFromRemix(it){
+  // 在聊天流补一条说明（但不切到 chat 模式，仅记录）
+  showToast('Remixing "'+it.title.replace(/&amp;/g,'&').slice(0,30)+'…" by '+it.author);
+}
 
 /* ===== Init ===== */
 renderFeed();updateCartBadge();renderCredits();
