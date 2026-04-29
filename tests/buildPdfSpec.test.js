@@ -115,4 +115,19 @@ describe('buildPdfSpec — Print-PDF 规格构建', () => {
     // last index is 9; never include the size value (10) itself
     expect(spec10.pages[0].rulers).toEqual([0, 9]);
   });
+
+  it('rulers handle minimal size=1 and the guard-triggering size=11', () => {
+    const spec1 = buildPdfSpec({
+      size: 1, grid: [0],
+      palette: ['#000'], title: 't', author: 'a',
+    });
+    expect(spec1.pages[0].rulers).toEqual([0]);
+
+    const spec11 = buildPdfSpec({
+      size: 11, grid: new Array(121).fill(0),
+      palette: ['#000'], title: 't', author: 'a',
+    });
+    // i=10 equals last=10, must not be duplicated
+    expect(spec11.pages[0].rulers).toEqual([0, 10]);
+  });
 });
