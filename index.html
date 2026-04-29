@@ -1142,14 +1142,33 @@ function applyWatermark(canvas){
 }
 
 /* ===== 数据层（localStorage） ===== */
+// Schema 版本：变了就强制重建 mock 种子
+const SEED_VERSION='2026-04-29-v2';
+if(localStorage.getItem('seedver')!==SEED_VERSION){
+  ['feed','mine','likes','saves'].forEach(k=>localStorage.removeItem(k));
+  localStorage.setItem('seedver',SEED_VERSION);
+  if(!localStorage.getItem('credits'))localStorage.setItem('credits','3'); // 欢迎赠 3 张 HD
+}
+
+function seedMine(){
+  return [
+    {id:'m_demo1',title:'My first cat keychain',author:'Avery Chen',likes:24,tags:['Animals','Keychains'],size:24,colors:5,beads:576,thumb:'assets/feed/beauty3.jpg'},
+    {id:'m_demo2',title:'Sunset coaster — 4 pack',author:'Avery Chen',likes:11,tags:['Coasters'],size:29,colors:6,beads:841,thumb:'assets/feed/beauty2.jpg'},
+  ];
+}
+function seedLikes(feed){return feed.slice(0,4).map(x=>x.id)}  // 默认点过 4 个
+function seedSaves(feed){return [feed[5].id,feed[12].id,feed[18].id]} // 默认收藏 3 个
+
+const _initFeed=JSON.parse(localStorage.getItem('feed')||'null')||seedFeed();
 const DB={
-  feed: JSON.parse(localStorage.getItem('feed')||'null') || seedFeed(),
+  feed: _initFeed,
   cart: JSON.parse(localStorage.getItem('cart')||'[]'),
-  mine: JSON.parse(localStorage.getItem('mine')||'[]'),
-  likes: new Set(JSON.parse(localStorage.getItem('likes')||'[]')),
-  saves: new Set(JSON.parse(localStorage.getItem('saves')||'[]')),
+  mine: JSON.parse(localStorage.getItem('mine')||'null') || seedMine(),
+  likes: new Set(JSON.parse(localStorage.getItem('likes')||'null') || seedLikes(_initFeed)),
+  saves: new Set(JSON.parse(localStorage.getItem('saves')||'null') || seedSaves(_initFeed)),
   save(){localStorage.setItem('feed',JSON.stringify(this.feed));localStorage.setItem('cart',JSON.stringify(this.cart));localStorage.setItem('mine',JSON.stringify(this.mine));localStorage.setItem('likes',JSON.stringify([...this.likes]));localStorage.setItem('saves',JSON.stringify([...this.saves]))}
 };
+DB.save();
 
 /* === Filter & search state === */
 let activeChip='All';
@@ -1173,6 +1192,7 @@ function filteredFeed(){
 }
 function seedFeed(){
   const samples=[
+    // === 第一批：原 17 条精选 ===
     {img:'rainbow.jpg',title:'Biggie Beads Rainbow — wall art',author:'Maya R.',likes:1432,tags:['Pixel Art','Holiday'],size:48,colors:8,beads:2304},
     {img:'floral-necklace.jpg',title:'Fancy floral necklace, fuse beads',author:'Theo K.',likes:2189,tags:['Animals','Coasters'],size:32,colors:6,beads:1024},
     {img:'bracelets.jpg',title:'Mom &amp; Me bracelets — matching set',author:'Lila S.',likes:987,tags:['Keychains'],size:24,colors:5,beads:576},
@@ -1190,6 +1210,38 @@ function seedFeed(){
     {img:'detail2.jpg',title:'Pattern texture, hi-res grid',author:'Jordan K.',likes:982,tags:['Pixel Art'],size:64,colors:6,beads:4096},
     {img:'detail3.jpg',title:'Macro shot — bead arrangement',author:'Skyler P.',likes:644,tags:['Pixel Art'],size:48,colors:6,beads:2304},
     {img:'daisy-holder.jpg',title:'Daisy holder — desk décor',author:'Morgan F.',likes:1109,tags:['Holiday'],size:29,colors:5,beads:841},
+    // === 第二批：变体重用 ===
+    {img:'beauty4.jpg',title:'Galaxy series — Aries to Pisces',author:'Kenji N.',likes:4218,tags:['Anime','Pixel Art'],size:48,colors:9,beads:2304},
+    {img:'rainbow.jpg',title:'Pride flag mini, 16×16 magnet',author:'Sofia P.',likes:5102,tags:['Pixel Art','Keychains'],size:16,colors:7,beads:256},
+    {img:'cupcake-frame.jpg',title:'Birthday cake — party set',author:'Ahmed F.',likes:2756,tags:['Holiday','Coasters'],size:32,colors:6,beads:1024},
+    {img:'daisy-card.jpg',title:'Mother\'s Day greeting, pastel',author:'Olivia C.',likes:1893,tags:['Holiday'],size:24,colors:5,beads:576},
+    {img:'spring-garland.jpg',title:'Easter egg garland — 8 pieces',author:'Niko V.',likes:721,tags:['Holiday','Animals'],size:24,colors:6,beads:576},
+    {img:'beauty3.jpg',title:'Forest critters — woodland set',author:'Zara H.',likes:2034,tags:['Animals','Keychains'],size:24,colors:6,beads:576},
+    {img:'beauty1.jpg',title:'Stained glass pixel — geometric',author:'Marco D.',likes:1320,tags:['Pixel Art','Coasters'],size:48,colors:8,beads:2304},
+    {img:'floral-necklace.jpg',title:'Wildflower meadow choker',author:'Aiden L.',likes:567,tags:['Coasters'],size:32,colors:7,beads:1024},
+    {img:'detail1.jpg',title:'Mood board · earth tones',author:'Fatima B.',likes:1655,tags:['Pixel Art','Coasters'],size:48,colors:6,beads:2304},
+    {img:'photo-frame.jpg',title:'Ocean horizon — wall piece',author:'Diego R.',likes:3187,tags:['Coasters'],size:64,colors:8,beads:4096},
+    {img:'bracelets.jpg',title:'Friendship bracelet pack of 6',author:'Yuki T.',likes:912,tags:['Keychains'],size:16,colors:5,beads:256},
+    {img:'detail2.jpg',title:'Pixel ramen bowl, 48×48',author:'Hiro S.',likes:2789,tags:['Anime','Pixel Art'],size:48,colors:7,beads:2304},
+    {img:'detail3.jpg',title:'Crystal cluster — gem collection',author:'Liam P.',likes:778,tags:['Pixel Art'],size:32,colors:6,beads:1024},
+    {img:'beauty2.jpg',title:'Modern quilt squares — set of 9',author:'Chloé M.',likes:1456,tags:['Coasters','Pixel Art'],size:29,colors:6,beads:841},
+    {img:'picture-display.jpg',title:'Polaroid picture stand',author:'Beckett W.',likes:489,tags:['Coasters'],size:32,colors:5,beads:1024},
+    {img:'daisy-holder.jpg',title:'Pencil cup — desk org series',author:'Ines K.',likes:823,tags:['Holiday'],size:32,colors:5,beads:1024},
+    {img:'floral-bouquet.jpg',title:'Tulip bouquet — Dutch palette',author:'Pieter J.',likes:1234,tags:['Holiday'],size:48,colors:7,beads:2304},
+    // === 第三批：anime / character / coaster sets ===
+    {img:'beauty4.jpg',title:'Pokémon-style starter trio',author:'Rin O.',likes:6892,tags:['Anime','Pixel Art'],size:32,colors:8,beads:1024},
+    {img:'beauty3.jpg',title:'Cat trio — coffee shop café',author:'Mei L.',likes:3421,tags:['Animals','Keychains'],size:24,colors:5,beads:576},
+    {img:'beauty1.jpg',title:'Studio scene — anime kawaii',author:'Asuka I.',likes:5128,tags:['Anime','Pixel Art'],size:48,colors:8,beads:2304},
+    {img:'cupcake-frame.jpg',title:'Donut shop — sweets series',author:'Tessa V.',likes:2009,tags:['Animals','Coasters'],size:32,colors:7,beads:1024},
+    {img:'rainbow.jpg',title:'Sunset gradient, 8-bit',author:'Jamal G.',likes:1823,tags:['Pixel Art'],size:32,colors:8,beads:1024},
+    {img:'detail1.jpg',title:'Mosaic blueprint — abstract',author:'Wren A.',likes:445,tags:['Pixel Art'],size:48,colors:6,beads:2304},
+    {img:'spring-garland.jpg',title:'Christmas garland — Nordic',author:'Astrid B.',likes:2876,tags:['Holiday'],size:24,colors:6,beads:576},
+    {img:'bracelets.jpg',title:'Beach friendship set, summer',author:'Solana E.',likes:1567,tags:['Keychains'],size:16,colors:5,beads:256},
+    {img:'floral-necklace.jpg',title:'Cherry blossom branch — long',author:'Haruki M.',likes:3398,tags:['Coasters','Anime'],size:48,colors:6,beads:2304},
+    {img:'photo-frame.jpg',title:'Mountain skyline wall piece',author:'Kit O.',likes:1098,tags:['Coasters'],size:64,colors:7,beads:4096},
+    {img:'detail3.jpg',title:'Texture explorer — gallery 12',author:'Saskia P.',likes:712,tags:['Pixel Art'],size:48,colors:6,beads:2304},
+    {img:'daisy-card.jpg',title:'Anniversary card — gold accents',author:'Owen R.',likes:1244,tags:['Holiday'],size:32,colors:5,beads:1024},
+    {img:'beauty2.jpg',title:'Tile pattern — Moroccan blue',author:'Layla N.',likes:2345,tags:['Coasters','Pixel Art'],size:29,colors:6,beads:841},
   ];
   return samples.map((s,i)=>({id:'s'+i,...s,thumb:'assets/feed/'+s.img}));
 }
