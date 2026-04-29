@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>BeadLab — Pixel Patterns from Photos</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2/dist/jspdf.umd.min.js"></script>
 <style>
 :root{
   --bg:#f6f1ea;          /* warm cream */
@@ -410,7 +411,7 @@ img{display:block;max-width:100%}
       <div class="stat-bar" id="stats"></div>
       <div class="legend" id="legend"></div>
       <div class="action-bar">
-        <button class="btn ghost" onclick="downloadPng()">Download PNG</button>
+        <button class="btn ghost" onclick="downloadPdf()">Download PDF</button>
         <button class="btn primary" onclick="addAllToCart()">Buy beads kit</button>
       </div>
       <div class="action-bar" style="margin-top:8px">
@@ -569,7 +570,9 @@ img{display:block;max-width:100%}
   </div>
 </div>
 
-<script>
+<script type="module">
+import { buildPdfSpec, gridFromImageData } from './src/lib.js';
+import { drawPdf } from './src/pdf-render.js';
 /* ===== 色板（精简版） ===== */
 const PALETTES = {
   hama:[
@@ -1121,17 +1124,43 @@ function rerender(){
   applyWatermark(cb);
 }
 
-function downloadPng(){
+function downloadPdf(){
   if(getCredits()<=0){showPaywall();return}
-  // 消耗 1 credit，导出无水印 HD
   setCredits(getCredits()-1);
-  const src=$('cv-bead');
-  // 重画放大版（4x）无水印
-  const hd=document.createElement('canvas');hd.width=src.width*4;hd.height=src.height*4;
-  const hx=hd.getContext('2d');hx.imageSmoothingEnabled=false;hx.drawImage(src,0,0,hd.width,hd.height);
-  const a=document.createElement('a');a.href=hd.toDataURL('image/png');
-  a.download=`beadlab_${Date.now()}.png`;a.click();
-  showToast(`HD downloaded · ${getCredits()} credits left`);
+  const cv = $('cv-bead');
+  const w = cv.width, h = cv.height;
+  const pal = PALETTES[$('palette').value].map(p => p[1]);
+  const ctx = cv.getContext('2d');
+  const data = ctx.getImageData(0, 0, w, h).data;
+  const size = parseInt($('size').value);
+  const cell = w / size;
+  const sampled = new Uint8ClampedArray(size * size * 4);
+  for(let y = 0; y < size; y++){
+    for(let x = 0; x < size; x++){
+      const sx = Math.floor(x * cell + cell / 2);
+      const sy = Math.floor(y * cell + cell / 2);
+      const si = (sy * w + sx) * 4;
+      const di = (y * size + x) * 4;
+      sampled[di] = data[si];
+      sampled[di+1] = data[si+1];
+      sampled[di+2] = data[si+2];
+      sampled[di+3] = 255;
+    }
+  }
+  const grid = gridFromImageData(sampled, size, size, pal);
+  const spec = buildPdfSpec({
+    size, grid, palette: pal,
+    title: 'BeadLab Pattern · ' + new Date().toLocaleDateString(),
+    author: 'You',
+  });
+  const blob = drawPdf(spec, window.jspdf.jsPDF);
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `beadlab_${Date.now()}.pdf`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  showToast(`PDF downloaded · ${getCredits()} credits left`);
 }
 function applyWatermark(canvas){
   const ctx=canvas.getContext('2d');ctx.save();
