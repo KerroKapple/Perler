@@ -13,6 +13,16 @@ function makeRulers(size) {
   return r;
 }
 
+const LEGEND_PER_PAGE = 36;
+
+function makeLegendPages(entries) {
+  const pages = [];
+  for (let i = 0; i < entries.length; i += LEGEND_PER_PAGE) {
+    pages.push({ kind: 'legend', entries: entries.slice(i, i + LEGEND_PER_PAGE) });
+  }
+  return pages.length ? pages : [{ kind: 'legend', entries: [] }];
+}
+
 function makeGridPages(size) {
   if (size <= PAGE_MAX) {
     return [{ kind: 'grid', size: { rows: size, cols: size }, rulers: makeRulers(size) }];
@@ -51,7 +61,7 @@ export function buildPdfSpec(pattern) {
     pageSize: 'letter',
     pages: [
       ...makeGridPages(size),
-      { kind: 'legend', entries },
+      ...makeLegendPages(entries),
     ],
     totalBeads: grid.length,
   };

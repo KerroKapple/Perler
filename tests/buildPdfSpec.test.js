@@ -130,4 +130,27 @@ describe('buildPdfSpec — Print-PDF 规格构建', () => {
     // i=10 equals last=10, must not be duplicated
     expect(spec11.pages[0].rulers).toEqual([0, 10]);
   });
+
+  it('legend splits across pages when palette > 36 colors', () => {
+    const palette = Array.from({ length: 50 }, (_, i) =>
+      '#' + i.toString(16).padStart(2, '0').repeat(3));
+    // Build a grid where each color appears at least once, with descending frequency
+    const grid = [];
+    for (let i = 0; i < 50; i++) {
+      const reps = 50 - i; // color 0 appears 50 times, color 49 appears 1 time
+      for (let r = 0; r < reps; r++) grid.push(i);
+    }
+    // Pad to perfect square so size is a clean integer
+    const size = Math.ceil(Math.sqrt(grid.length));
+    while (grid.length < size * size) grid.push(0);
+    const spec = buildPdfSpec({ size, grid, palette, title: 't', author: 'a' });
+    const legendPages = spec.pages.filter(p => p.kind === 'legend');
+    expect(legendPages).toHaveLength(2);
+    expect(legendPages[0].entries).toHaveLength(36);
+    expect(legendPages[1].entries).toHaveLength(14);
+    // Sort is preserved across pages: every entry on page 1 has count >= every entry on page 2
+    const minP1 = Math.min(...legendPages[0].entries.map(e => e.count));
+    const maxP2 = Math.max(...legendPages[1].entries.map(e => e.count));
+    expect(minP1).toBeGreaterThanOrEqual(maxP2);
+  });
 });
