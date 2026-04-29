@@ -10,7 +10,7 @@ set -euo pipefail
 : "${BEADLAB_DOMAIN:?Need BEADLAB_DOMAIN, e.g. BEADLAB_DOMAIN=beadlab.example.com $0}"
 SSH_TARGET="${SSH_TARGET:-kapple}"
 REMOTE_DIR="${REMOTE_DIR:-/opt/docker/beadlab}"
-REPO_URL="${REPO_URL:-git@github.com:KerroKapple/beadlab.git}"
+REPO_URL="${REPO_URL:-git@github.com:KerroKapple/Perler.git}"
 BRANCH="${BRANCH:-main}"
 
 echo "==> Target: $SSH_TARGET   Domain: $BEADLAB_DOMAIN   Path: $REMOTE_DIR"
