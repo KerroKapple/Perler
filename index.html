@@ -1126,7 +1126,7 @@ function rerender(){
 
 function downloadPdf(){
   if(getCredits()<=0){showPaywall();return}
-  setCredits(getCredits()-1);
+  if(!window.jspdf||!window.jspdf.jsPDF){showToast('PDF library failed to load — please reload');return}
   const cv = $('cv-bead');
   const w = cv.width, h = cv.height;
   const pal = PALETTES[$('palette').value].map(p => p[1]);
@@ -1147,13 +1147,21 @@ function downloadPdf(){
       sampled[di+3] = 255;
     }
   }
-  const grid = gridFromImageData(sampled, size, size, pal);
-  const spec = buildPdfSpec({
-    size, grid, palette: pal,
-    title: 'BeadLab Pattern · ' + new Date().toLocaleDateString(),
-    author: 'You',
-  });
-  const blob = drawPdf(spec, window.jspdf.jsPDF);
+  let blob;
+  try {
+    const grid = gridFromImageData(sampled, size, size, pal);
+    const spec = buildPdfSpec({
+      size, grid, palette: pal,
+      title: 'BeadLab Pattern · ' + new Date().toLocaleDateString(),
+      author: 'You',
+    });
+    blob = drawPdf(spec, window.jspdf.jsPDF);
+  } catch(err) {
+    console.error(err);
+    showToast('PDF generation failed: ' + err.message);
+    return;
+  }
+  setCredits(getCredits()-1);  // 仅在成功后扣
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -1508,6 +1516,15 @@ renderFeed();updateCartBadge();renderCredits();
 // 首次进入聊天面板的欢迎语
 showSuggestions();
 appendMsg('ai','Hey 👋 — what would you like to make today? Tell me the subject (a pet, flower, mood…), the use (keychain, coaster, wall art) and any color vibe. Or pick a starter below.');
+
+// Bridge module-scope functions to global so inline onclick handlers can find them.
+Object.assign(window, {
+  addAllToCart, applyStylize, buyCredits, buyThisKit, checkout,
+  downloadPdf, hideCart, hideDetail, hidePaywall, publishWork,
+  remixThis, resetStylize, rmCart, saveApiCfg, sendChat, setChip,
+  sharePattern, showCart, showPaywall, subscribePro, switchMode,
+  switchTab, toggleApiCfg, toggleLike, toggleSave,
+});
 </script>
 </body>
 </html>
