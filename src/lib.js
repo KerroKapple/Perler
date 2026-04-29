@@ -4,11 +4,12 @@
 const PAGE_MAX = 48; // 单页 grid 最大边长
 
 function makeRulers(size) {
+  const last = size - 1;
   const r = [];
-  for (let i = 0; i <= size; i += 10) {
-    if (i < size) r.push(i);
+  for (let i = 0; i < size; i += 10) {
+    if (i !== last) r.push(i);
   }
-  r.push(size - 1);
+  r.push(last);
   return r;
 }
 

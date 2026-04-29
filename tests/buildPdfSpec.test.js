@@ -100,4 +100,19 @@ describe('buildPdfSpec — Print-PDF 规格构建', () => {
     expect(ents[1].percent).toBe(31.3);
     expect(ents[2].percent).toBe(6.3);
   });
+
+  it('rulers always include 0, every multiple of 10 strictly inside, and last index', () => {
+    const spec23 = buildPdfSpec({
+      size: 23, grid: new Array(23 * 23).fill(0),
+      palette: ['#000'], title: 't', author: 'a',
+    });
+    expect(spec23.pages[0].rulers).toEqual([0, 10, 20, 22]);
+
+    const spec10 = buildPdfSpec({
+      size: 10, grid: new Array(100).fill(0),
+      palette: ['#000'], title: 't', author: 'a',
+    });
+    // last index is 9; never include the size value (10) itself
+    expect(spec10.pages[0].rulers).toEqual([0, 9]);
+  });
 });
