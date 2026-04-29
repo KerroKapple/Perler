@@ -53,13 +53,20 @@ function hexToRgb(h) {
 }
 
 export function gridFromImageData(rgba, width, height, palette) {
-  const pal = palette.map(hexToRgb);
+  const palFlat = new Int16Array(palette.length * 3);
+  palette.forEach((hex, i) => {
+    const v = hex.replace('#', '');
+    palFlat[i * 3]     = parseInt(v.slice(0, 2), 16);
+    palFlat[i * 3 + 1] = parseInt(v.slice(2, 4), 16);
+    palFlat[i * 3 + 2] = parseInt(v.slice(4, 6), 16);
+  });
   const out = new Array(width * height);
   for (let i = 0; i < width * height; i++) {
-    const r = rgba[i * 4], g = rgba[i * 4 + 1], b = rgba[i * 4 + 2];
+    const base = i * 4;
+    const r = rgba[base], g = rgba[base + 1], b = rgba[base + 2];
     let best = 0, bd = Infinity;
-    for (let p = 0; p < pal.length; p++) {
-      const dr = r - pal[p][0], dg = g - pal[p][1], db = b - pal[p][2];
+    for (let p = 0; p < palette.length; p++) {
+      const dr = r - palFlat[p * 3], dg = g - palFlat[p * 3 + 1], db = b - palFlat[p * 3 + 2];
       const d = dr * dr + dg * dg + db * db;
       if (d < bd) { bd = d; best = p; }
     }
