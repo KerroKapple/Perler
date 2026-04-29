@@ -43,6 +43,31 @@ function makeGridPages(size) {
   return pages;
 }
 
+function hexToRgb(h) {
+  const v = h.replace('#', '');
+  return [
+    parseInt(v.slice(0, 2), 16),
+    parseInt(v.slice(2, 4), 16),
+    parseInt(v.slice(4, 6), 16),
+  ];
+}
+
+export function gridFromImageData(rgba, width, height, palette) {
+  const pal = palette.map(hexToRgb);
+  const out = new Array(width * height);
+  for (let i = 0; i < width * height; i++) {
+    const r = rgba[i * 4], g = rgba[i * 4 + 1], b = rgba[i * 4 + 2];
+    let best = 0, bd = Infinity;
+    for (let p = 0; p < pal.length; p++) {
+      const dr = r - pal[p][0], dg = g - pal[p][1], db = b - pal[p][2];
+      const d = dr * dr + dg * dg + db * db;
+      if (d < bd) { bd = d; best = p; }
+    }
+    out[i] = best;
+  }
+  return out;
+}
+
 /**
  * Build a printable-PDF spec from a finished bead pattern.
  * Returns a plain JS object describing pages — rendering is the caller's job.
