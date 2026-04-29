@@ -1,0 +1,20 @@
+{$BEADLAB_DOMAIN} {
+	root * /srv/beadlab
+	file_server
+	encode gzip zstd
+	header {
+		# Static assets cache
+		?Cache-Control "public, max-age=86400"
+		# Security baseline
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "geolocation=(), microphone=(), camera=()"
+	}
+	@assets path /assets/*
+	header @assets Cache-Control "public, max-age=2592000, immutable"
+
+	log {
+		output file /var/log/caddy/beadlab.log
+		format console
+	}
+}

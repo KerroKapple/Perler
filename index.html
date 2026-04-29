@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BeadLab — Pixel Patterns from Photos</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f1ea;          /* warm cream */
+  --card:#ffffff;
+  --ink:#1c1c1c;          /* near-black */
+  --sub:#6b6258;          /* warm gray */
+  --primary:#b85c3c;      /* terracotta */
+  --primary-2:#d98c6a;
+  --accent:#3d5a4c;       /* sage */
+  --line:#e7dfd3;
+  --ok:#2f6b4d;
+  --shadow:0 1px 2px rgba(28,28,28,.04), 0 8px 24px rgba(28,28,28,.05);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--ink);
+  -webkit-font-smoothing:antialiased;letter-spacing:-.005em;}
+h1,h2,h3,.serif{font-family:'Fraunces',Georgia,serif;letter-spacing:-.02em}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+img{display:block;max-width:100%}
+
+/* Layout — Desktop Web */
+.app{max-width:1440px;margin:0 auto;min-height:100vh;background:var(--bg);position:relative}
+.topbar{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:32px;
+  padding:14px 40px;background:rgba(246,241,234,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.topbar .logo{display:flex;align-items:center;gap:10px;font-family:'Fraunces',serif;font-weight:700;font-size:22px;letter-spacing:-.02em;cursor:pointer}
+.topbar .logo-mark{width:32px;height:32px;border-radius:8px;background:var(--primary);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-family:'Fraunces',serif;font-weight:700}
+.topbar .nav{display:flex;align-items:center;gap:6px;flex:0 0 auto}
+.topbar .nav button{padding:8px 16px;border-radius:8px;font-size:14px;font-weight:500;color:var(--ink);transition:background .15s}
+.topbar .nav button:hover{background:#0001}
+.topbar .nav button.active{background:var(--ink);color:#fff}
+.topbar .search{flex:1;max-width:420px;position:relative}
+.topbar .search input{width:100%;padding:10px 14px 10px 40px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:14px;font-family:inherit;color:var(--ink);outline:none;transition:border-color .15s}
+.topbar .search input:focus{border-color:var(--ink)}
+.topbar .search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--sub)}
+.topbar .right{display:flex;align-items:center;gap:8px;margin-left:auto}
+.topbar .icon-btn{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--ink);position:relative;font-size:18px;transition:background .15s}
+.topbar .icon-btn:hover{background:#0001}
+.topbar .badge{position:absolute;top:4px;right:4px;background:var(--primary);color:#fff;font-size:10px;border-radius:999px;padding:1px 5px;font-weight:600;font-family:Inter;min-width:16px;text-align:center}
+.topbar .avatar-btn{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--primary-2),var(--accent));color:#fff;font-family:'Fraunces',serif;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer}
+.topbar .cta{padding:10px 20px;border-radius:8px;background:var(--ink);color:#fff;font-weight:600;font-size:13px}
+
+.tabbar{display:none}
+
+.page{display:none;padding:32px 40px 60px}
+.page.active{display:block}
+.page-hero{font-family:'Fraunces',serif;font-size:56px;font-weight:500;line-height:1;margin:12px 0 8px;letter-spacing:-.03em;max-width:900px}
+.page-sub{color:var(--sub);font-size:16px;margin-bottom:28px;line-height:1.5;max-width:640px}
+
+/* Cards & feeds */
+.chip-row{display:flex;gap:8px;padding:0 0 24px;overflow-x:auto;scrollbar-width:none;flex-wrap:wrap}
+.chip-row::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;padding:9px 18px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:14px;color:var(--ink);font-weight:500;cursor:pointer;white-space:nowrap;transition:all .15s}
+.chip:hover{border-color:var(--ink)}
+.chip.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+.feed{column-count:5;column-gap:14px}
+@media (max-width:1280px){.feed{column-count:4}}
+@media (max-width:1024px){.feed{column-count:3}}
+@media (max-width:720px){.feed{column-count:2}}
+.card{break-inside:avoid;margin-bottom:14px;background:var(--card);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);cursor:pointer;transition:transform .2s,box-shadow .2s}
+.card:hover{transform:translateY(-3px);box-shadow:0 4px 8px rgba(28,28,28,.06),0 16px 32px rgba(28,28,28,.1)}
+.card .thumb{width:100%;display:block}
+.card .meta{padding:12px 14px 14px}
+.card .title{font-size:14px;font-weight:600;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:var(--ink)}
+.card .row{display:flex;align-items:center;justify-content:space-between;margin-top:10px;color:var(--sub);font-size:12px}
+.card .author{display:flex;align-items:center;gap:6px;font-weight:500}
+.card .avatar{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--primary-2),var(--accent))}
+.card .heart{display:flex;align-items:center;gap:4px;font-weight:500}
+
+/* Mode switcher */
+.mode-switch{display:inline-flex;background:#fff;border:1px solid var(--line);border-radius:10px;padding:4px;margin-bottom:14px;box-shadow:var(--shadow)}
+.mode-tab{padding:9px 16px;border-radius:7px;font-size:13px;font-weight:600;color:var(--sub);display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.mode-tab.active{background:var(--ink);color:#fff}
+
+/* Chat panel */
+.chat-panel{background:var(--card);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;border:1px solid var(--line)}
+.chat-hero{padding:24px;display:flex;gap:16px;background:linear-gradient(135deg,#faf6ef 0%,#f6f1ea 100%);border-bottom:1px solid var(--line)}
+.chat-icon{width:44px;height:44px;border-radius:12px;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;flex:0 0 auto}
+.chat-h{font-family:'Fraunces',serif;font-size:20px;font-weight:600;line-height:1.2}
+.chat-sub{color:var(--sub);font-size:13px;margin-top:6px;line-height:1.5}
+.chat-stream{padding:18px 24px;max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;min-height:80px}
+.msg{max-width:85%;padding:11px 14px;border-radius:12px;font-size:14px;line-height:1.5;animation:msgIn .2s ease-out}
+.msg.ai{background:#faf6ef;color:var(--ink);align-self:flex-start;border-bottom-left-radius:4px}
+.msg.me{background:var(--ink);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.msg.typing{background:#faf6ef;align-self:flex-start;color:var(--sub)}
+.msg.typing .dots{display:inline-flex;gap:3px}
+.msg.typing .dots span{width:6px;height:6px;background:var(--sub);border-radius:50%;animation:typing 1.2s infinite}
+.msg.typing .dots span:nth-child(2){animation-delay:.15s}.msg.typing .dots span:nth-child(3){animation-delay:.3s}
+@keyframes typing{0%,60%,100%{opacity:.3}30%{opacity:1}}
+@keyframes msgIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.chat-suggest{padding:0 24px 14px;display:flex;flex-wrap:wrap;gap:6px}
+.chat-suggest button{padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:12px;color:var(--ink);cursor:pointer;font-weight:500;transition:all .15s}
+.chat-suggest button:hover{border-color:var(--ink);background:#faf6ef}
+.chat-input-row{padding:14px 16px 16px;display:flex;gap:10px;border-top:1px solid var(--line);background:#fdfbf7}
+.chat-input-row input{flex:1;padding:12px 14px;border:1px solid var(--line);border-radius:10px;font-size:14px;font-family:inherit;outline:none;background:#fff}
+.chat-input-row input:focus{border-color:var(--ink)}
+.chat-result{margin-top:6px;padding:14px;background:#faf6ef;border-radius:10px;display:flex;gap:14px;align-items:center}
+.chat-result img{width:96px;height:96px;border-radius:8px;object-fit:cover;flex:0 0 auto}
+.chat-result .info{flex:1}
+.chat-result .info .t{font-family:'Fraunces',serif;font-weight:600;font-size:15px}
+.chat-result .info .d{color:var(--sub);font-size:12px;margin-top:3px}
+
+/* Credits */
+.credits-pill{display:inline-flex;align-items:center;gap:5px;padding:6px 11px;background:#faf6ef;border:1px solid var(--line);border-radius:999px;font-size:12px;font-weight:600;color:var(--ink);cursor:pointer}
+.credits-pill .dot{width:6px;height:6px;background:var(--primary);border-radius:50%}
+.credits-pill:hover{border-color:var(--ink)}
+
+/* Upload page — desktop two-column */
+.upload-grid{display:grid;grid-template-columns:1fr 380px;gap:24px;align-items:start}
+@media (max-width:980px){.upload-grid{grid-template-columns:1fr}}
+.upload-left{min-width:0}
+.upload-right{position:sticky;top:90px;display:flex;flex-direction:column;gap:14px}
+.uploader{background:var(--card);border-radius:14px;padding:60px 24px;text-align:center;border:1.5px dashed var(--line);transition:border-color .2s;cursor:pointer}
+.uploader:hover{border-color:var(--primary);background:#fdfbf7}
+.uploader .icon{width:60px;height:60px;border-radius:50%;background:#f6f1ea;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 16px}
+.uploader .h{font-family:'Fraunces',serif;font-size:24px;font-weight:500;letter-spacing:-.01em}
+.uploader p{color:var(--sub);font-size:14px;margin-top:8px;line-height:1.5}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 20px;border-radius:8px;background:var(--ink);color:#fff;font-weight:600;font-size:13px;letter-spacing:.01em;transition:opacity .15s}
+.btn:hover{opacity:.88}
+.btn.primary{background:var(--primary)}
+.btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn.ghost:hover{border-color:var(--ink)}
+.btn[disabled]{opacity:.4;pointer-events:none}
+
+.controls{background:var(--card);border-radius:14px;padding:22px;box-shadow:var(--shadow)}
+.controls h4{font-family:'Fraunces',serif;font-size:17px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.row-line{display:flex;align-items:center;justify-content:space-between;padding:10px 0;font-size:13px;gap:12px}
+.row-line label{font-weight:500;color:var(--sub);text-transform:uppercase;font-size:11px;letter-spacing:.08em;flex:0 0 auto}
+.row-line input[type=range]{flex:1;accent-color:var(--primary)}
+.row-line select,.row-line input[type=text],.row-line input[type=password]{padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:13px;font-family:inherit;color:var(--ink);min-width:0;flex:1}
+
+.preview{margin-top:24px;background:var(--card);border-radius:14px;padding:28px;box-shadow:var(--shadow)}
+.preview h3{font-family:'Fraunces',serif;font-size:22px;font-weight:600;margin-bottom:18px}
+.canvas-wrap{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.canvas-wrap canvas{width:100%;height:auto;background:#faf6ef;border:1px solid var(--line);border-radius:10px;image-rendering:pixelated;display:block}
+.canvas-label{font-size:11px;color:var(--sub);text-align:center;margin-top:8px;text-transform:uppercase;letter-spacing:.12em;font-weight:600}
+.stat-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:22px;padding:18px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.stat-bar .stat{}
+.stat-bar .stat .v{font-family:'Fraunces',serif;font-size:28px;font-weight:600;line-height:1}
+.stat-bar .stat .l{font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:.12em;margin-top:6px;font-weight:500}
+
+.legend{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:6px;margin-top:14px;font-size:11px}
+.legend .item{display:flex;align-items:center;gap:6px;padding:6px 8px;background:#faf6ef;border-radius:6px}
+.legend .swatch{width:14px;height:14px;border-radius:3px;border:1px solid #0001;flex:0 0 14px}
+.action-bar{display:flex;gap:8px;margin-top:16px}
+.action-bar .btn{flex:1}
+
+/* Style chips */
+.style-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px}
+.style-grid .opt{padding:10px 4px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:11px;cursor:pointer;text-align:center}
+.style-grid .opt .e{display:block;font-size:18px;margin-bottom:2px}
+.style-grid .opt.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+/* Shop */
+.shop-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+@media (max-width:1024px){.shop-grid{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:720px){.shop-grid{grid-template-columns:repeat(2,1fr)}}
+.sku{background:var(--card);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);cursor:pointer;transition:transform .2s,box-shadow .2s}
+.sku:hover{transform:translateY(-3px);box-shadow:0 4px 8px rgba(28,28,28,.06),0 16px 32px rgba(28,28,28,.1)}
+.sku .swatch-strip{height:180px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr)}
+.sku .swatch-strip span{display:block}
+.sku-thumb{aspect-ratio:1/1;background:#faf6ef;overflow:hidden}
+.sku-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s}
+.sku:hover .sku-thumb img{transform:scale(1.04)}
+.sku .info{padding:18px}
+.sku .name{font-family:'Fraunces',serif;font-size:17px;font-weight:600;line-height:1.3}
+.sku .desc{color:var(--sub);font-size:12px;margin-top:6px;line-height:1.5}
+.sku .bot{display:flex;align-items:center;justify-content:space-between;margin-top:14px}
+.sku .price{font-family:'Fraunces',serif;font-size:22px;font-weight:600}
+.sku .add{padding:8px 16px;border-radius:8px;background:var(--ink);color:#fff;font-weight:600;font-size:12px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;transition:opacity .15s}
+.sku .add:hover{opacity:.85}
+
+/* Profile */
+.profile-hd{background:var(--card);border-radius:14px;padding:32px;display:flex;align-items:center;gap:20px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.profile-hd .av{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--primary-2),var(--accent));display:flex;align-items:center;justify-content:center;font-size:32px;color:#fff;font-family:'Fraunces',serif;font-weight:700}
+.profile-hd .name{font-family:'Fraunces',serif;font-weight:600;font-size:28px}
+.profile-hd .bio{color:var(--sub);font-size:14px;margin-top:4px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+.stats .s{background:var(--card);border-radius:12px;padding:24px;text-align:center;box-shadow:var(--shadow)}
+.stats .num{font-family:'Fraunces',serif;font-weight:600;font-size:32px;line-height:1}
+.stats .lbl{color:var(--sub);font-size:11px;text-transform:uppercase;letter-spacing:.12em;margin-top:8px;font-weight:500}
+
+/* Toast & Sheet (desktop drawer) */
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:32px;background:var(--ink);color:#fff;padding:12px 20px;border-radius:10px;font-size:14px;opacity:0;transition:opacity .25s;z-index:50;box-shadow:var(--shadow)}
+.toast.show{opacity:1}
+
+.sheet{position:fixed;inset:0;background:rgba(28,28,28,.5);display:none;z-index:30;align-items:flex-start;justify-content:flex-end}
+.sheet.show{display:flex}
+.sheet-body{background:#fff;width:420px;max-width:100%;height:100vh;padding:32px;overflow:auto;animation:slideIn .2s ease-out}
+@keyframes slideIn{from{transform:translateX(20px);opacity:0}to{transform:none;opacity:1}}
+.sheet h3{font-family:'Fraunces',serif;font-size:26px;font-weight:600;margin-bottom:20px}
+.sheet .close{float:right;color:var(--sub);font-size:28px;line-height:1;cursor:pointer}
+
+.empty{text-align:center;color:var(--sub);padding:60px 0;font-size:14px}
+.section-title{font-family:'Fraunces',serif;font-size:24px;font-weight:600;margin:32px 0 16px}
+
+/* Paywall modal */
+.modal{position:fixed;inset:0;background:rgba(28,28,28,.5);display:none;z-index:40;align-items:center;justify-content:center;padding:24px}
+.modal.show{display:flex}
+.modal-body{background:#fff;width:100%;max-width:880px;border-radius:16px;padding:40px;max-height:90vh;overflow:auto;position:relative;animation:msgIn .25s ease-out}
+.modal-body .close{position:absolute;top:16px;right:20px;color:var(--sub);font-size:28px;line-height:1;cursor:pointer;background:none;border:none}
+.paywall-icon{width:48px;height:48px;border-radius:14px;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:16px}
+.paywall-h{font-family:'Fraunces',serif;font-size:30px;font-weight:600;line-height:1.1;margin-bottom:8px;letter-spacing:-.02em}
+.paywall-sub{color:var(--sub);font-size:15px;margin-bottom:28px;max-width:600px;line-height:1.5}
+.paywall-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px}
+@media (max-width:720px){.paywall-grid{grid-template-columns:1fr}}
+.plan{background:#fdfbf7;border:1.5px solid var(--line);border-radius:12px;padding:22px;position:relative}
+.plan.recommended{border-color:var(--ink);background:#fff}
+.plan .badge{position:absolute;top:-10px;left:18px;background:var(--ink);color:#fff;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:999px}
+.plan-h{font-family:'Fraunces',serif;font-size:18px;font-weight:600;margin-bottom:6px}
+.plan-price{font-size:14px;color:var(--sub);margin-bottom:16px}
+.plan-price strong{font-family:'Fraunces',serif;color:var(--ink);font-size:28px;font-weight:600;line-height:1}
+.plan-price .sub{font-size:12px}
+.plan-feat{list-style:none;font-size:13px;line-height:1.7;color:var(--ink);margin-bottom:18px}
+.paywall-pack{display:flex;gap:8px;align-items:center;padding-top:18px;border-top:1px solid var(--line);flex-wrap:wrap}
+.pack{padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s}
+.pack:hover{border-color:var(--ink)}
+
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="topbar">
+    <div class="logo" onclick="switchTab('feed')"><span class="logo-mark">B</span><span>BeadLab</span></div>
+    <nav class="nav">
+      <button data-tab="feed" class="active" onclick="switchTab('feed')">Discover</button>
+      <button data-tab="upload" onclick="switchTab('upload')">Create</button>
+      <button data-tab="shop" onclick="switchTab('shop')">Shop</button>
+    </nav>
+    <div class="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Search patterns, makers, palettes…">
+    </div>
+    <div class="right">
+      <button class="credits-pill" onclick="showPaywall('credits')" title="Your HD download credits">
+        <span class="dot"></span><span id="credits-num">0</span> credits
+      </button>
+      <button class="cta" onclick="switchTab('upload')">＋ Create</button>
+      <button class="icon-btn" onclick="showCart()" aria-label="Cart">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
+        <span id="cart-badge" class="badge" style="display:none"></span>
+      </button>
+      <button class="avatar-btn" onclick="switchTab('me')">A</button>
+    </div>
+  </header>
+
+  <!-- Discover (Feed) -->
+  <section class="page active" id="page-feed">
+    <h2 class="page-hero">Discover patterns<br><em style="color:var(--primary);font-style:italic">made by makers.</em></h2>
+    <p class="page-sub">Trending bead-art patterns from the community.</p>
+    <div class="chip-row">
+      <button class="chip active">All</button>
+      <button class="chip">Pixel Art</button>
+      <button class="chip">Anime</button>
+      <button class="chip">Animals</button>
+      <button class="chip">Keychains</button>
+      <button class="chip">Coasters</button>
+      <button class="chip">Holiday</button>
+    </div>
+    <div class="feed" id="feed-list"></div>
+  </section>
+
+  <!-- Create -->
+  <section class="page" id="page-upload">
+    <h2 class="page-hero">Turn any photo<br><em style="color:var(--primary);font-style:italic">into a bead pattern.</em></h2>
+    <p class="page-sub">Upload → stylize with AI → generate a printable pattern with palette &amp; bead count.</p>
+
+    <div class="upload-grid">
+    <div class="upload-left">
+
+    <!-- Mode switcher: Chat with AI or Upload -->
+    <div class="mode-switch">
+      <button class="mode-tab active" data-mode="chat" onclick="switchMode('chat')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Chat with AI
+      </button>
+      <button class="mode-tab" data-mode="photo" onclick="switchMode('photo')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        Upload photo
+      </button>
+    </div>
+
+    <!-- AI Chat panel -->
+    <div class="chat-panel" id="chat-panel">
+      <div class="chat-hero">
+        <div class="chat-icon">✦</div>
+        <div>
+          <div class="chat-h">Don't have a photo? Just describe it.</div>
+          <div class="chat-sub">Tell our AI what you want to make — pet, flower, mood, vibe — we'll design a pattern for you.</div>
+        </div>
+      </div>
+      <div class="chat-stream" id="chat-stream"></div>
+      <div class="chat-suggest" id="chat-suggest"></div>
+      <div class="chat-input-row">
+        <input type="text" id="chat-input" placeholder="e.g. a cute orange cat keychain, pastel palette" onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="btn primary" onclick="sendChat()">Send</button>
+      </div>
+    </div>
+
+    <!-- Photo upload panel -->
+    <div class="uploader" id="photo-panel" style="display:none" onclick="document.getElementById('file-input').click()">
+      <div class="icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      </div>
+      <div class="h">Upload your photo</div>
+      <p>JPG or PNG — clear subject works best</p>
+      <button class="btn primary" style="margin-top:14px">Choose image</button>
+      <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleFile(event)">
+    </div>
+    </div><!-- /.upload-left -->
+
+    <div class="upload-right">
+    <!-- AI Stylize -->
+    <div class="controls" id="stylize-panel" style="display:none">
+      <h4>① Stylize <button onclick="toggleApiCfg()" style="font-size:11px;color:var(--sub);font-weight:500;text-transform:uppercase;letter-spacing:.08em">API settings</button></h4>
+      <div class="style-grid" id="style-chips"></div>
+      <div id="api-cfg" style="display:none;margin-top:14px;background:#faf6ef;border-radius:8px;padding:14px;font-size:12px">
+        <div style="margin-bottom:10px;color:var(--sub);line-height:1.5">Leave empty to use built-in filters (free, instant). Add a key to call a real model.</div>
+        <div class="row-line"><label>Provider</label>
+          <select id="api-provider">
+            <option value="local">Built-in filters</option>
+            <option value="openai">OpenAI · DALL·E</option>
+            <option value="sdwebui">Stable Diffusion (local)</option>
+            <option value="jimeng">Custom endpoint</option>
+          </select>
+        </div>
+        <div class="row-line"><label>Endpoint</label><input type="text" id="api-url" placeholder="https://api.openai.com/v1/images/edits"></div>
+        <div class="row-line"><label>API key</label><input type="password" id="api-key" placeholder="sk-..."></div>
+        <button class="btn ghost" style="margin-top:8px;padding:7px 14px;font-size:12px" onclick="saveApiCfg()">Save</button>
+      </div>
+      <div class="action-bar">
+        <button class="btn primary" onclick="applyStylize()">Apply style</button>
+        <button class="btn ghost" onclick="resetStylize()">Reset</button>
+      </div>
+      <div id="stylize-status" style="font-size:12px;color:var(--sub);margin-top:8px;text-align:center"></div>
+    </div>
+
+    <div class="controls" id="controls" style="display:none">
+      <h4>② Pattern settings</h4>
+      <div class="row-line">
+        <label>Grid size</label>
+        <span style="display:flex;align-items:center;gap:10px;width:65%;justify-content:flex-end">
+          <input type="range" id="size" min="20" max="80" value="48" oninput="rerender()">
+          <span id="size-val" style="font-family:Fraunces,serif;font-weight:600;min-width:46px;text-align:right">48×48</span>
+        </span>
+      </div>
+      <div class="row-line">
+        <label>Bead palette</label>
+        <select id="palette" onchange="rerender()">
+          <option value="perler">Perler · 32 colors</option>
+          <option value="hama">Hama · 24 colors</option>
+        </select>
+      </div>
+      <div class="row-line">
+        <label>Dithering</label>
+        <select id="dither" onchange="rerender()">
+          <option value="none">None (flat)</option>
+          <option value="floyd">Floyd–Steinberg</option>
+        </select>
+      </div>
+    </div>
+    </div><!-- /.upload-right -->
+    </div><!-- /.upload-grid -->
+
+    <div class="preview" id="preview" style="display:none">
+      <h3>③ Preview</h3>
+      <div class="canvas-wrap">
+        <div><canvas id="cv-orig"></canvas><div class="canvas-label">Source</div></div>
+        <div><canvas id="cv-bead"></canvas><div class="canvas-label">Pattern</div></div>
+      </div>
+      <div class="stat-bar" id="stats"></div>
+      <div class="legend" id="legend"></div>
+      <div class="action-bar">
+        <button class="btn ghost" onclick="downloadPng()">Download PNG</button>
+        <button class="btn primary" onclick="addAllToCart()">Buy beads kit</button>
+      </div>
+      <div class="action-bar" style="margin-top:8px">
+        <button class="btn" onclick="publishWork()" style="width:100%">Share to community</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Shop -->
+  <section class="page" id="page-shop">
+    <h2 class="page-hero">The Shop.</h2>
+    <p class="page-sub">Curated bead kits, boards &amp; tools — shipped from US warehouses.</p>
+    <div class="chip-row">
+      <button class="chip active">All</button>
+      <button class="chip">Bead kits</button>
+      <button class="chip">Pegboards</button>
+      <button class="chip">Tools</button>
+      <button class="chip">Bundles</button>
+    </div>
+    <div class="shop-grid" id="shop-list"></div>
+  </section>
+
+  <!-- Profile -->
+  <section class="page" id="page-me">
+    <h2 class="page-hero" style="margin-bottom:14px">Profile.</h2>
+    <div class="profile-hd">
+      <div class="av">A</div>
+      <div>
+        <div class="name">Avery Chen</div>
+        <div class="bio">Brooklyn · pixel art &amp; bead crafts</div>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="s"><div class="num" id="me-works">0</div><div class="lbl">Patterns</div></div>
+      <div class="s"><div class="num" id="me-likes">0</div><div class="lbl">Likes</div></div>
+      <div class="s"><div class="num" id="me-orders">0</div><div class="lbl">Orders</div></div>
+    </div>
+    <h3 class="section-title">Your patterns</h3>
+    <div class="feed" id="my-list"></div>
+  </section>
+
+  <!-- Profile tab is on avatar; no bottom tabbar in desktop web -->
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Paywall modal -->
+<div class="modal" id="paywall" onclick="if(event.target===this)hidePaywall()">
+  <div class="modal-body">
+    <button class="close" onclick="hidePaywall()">×</button>
+    <div class="paywall-icon">✦</div>
+    <h3 class="paywall-h">Unlock HD &amp; print-ready PDF</h3>
+    <p class="paywall-sub">Free previews stay free, forever. To download HD pattern files, pick an option below.</p>
+    <div class="paywall-grid">
+      <div class="plan recommended">
+        <div class="badge">Best value</div>
+        <div class="plan-h">Buy a bead kit</div>
+        <div class="plan-price">from <strong>$14.99</strong></div>
+        <ul class="plan-feat">
+          <li>✓ <strong>5 HD downloads</strong> free with any kit</li>
+          <li>✓ Real beads shipped to your door</li>
+          <li>✓ Auto-matched to your pattern</li>
+        </ul>
+        <button class="btn primary" style="width:100%" onclick="hidePaywall();switchTab('shop')">Browse the shop</button>
+      </div>
+      <div class="plan">
+        <div class="plan-h">Single HD download</div>
+        <div class="plan-price"><strong>$2.99</strong> <span class="sub">/ pattern</span></div>
+        <ul class="plan-feat">
+          <li>✓ HD PNG (4096×4096)</li>
+          <li>✓ Print-ready PDF with legend</li>
+          <li>✓ No watermark</li>
+        </ul>
+        <button class="btn ghost" style="width:100%" onclick="buyCredits(1,2.99)">Buy 1 credit</button>
+      </div>
+      <div class="plan">
+        <div class="plan-h">Pro Studio</div>
+        <div class="plan-price"><strong>$4.99</strong> <span class="sub">/ month</span></div>
+        <ul class="plan-feat">
+          <li>✓ Unlimited HD downloads</li>
+          <li>✓ Bulk export (multi-pattern PDF)</li>
+          <li>✓ Priority AI generation</li>
+        </ul>
+        <button class="btn ghost" style="width:100%" onclick="subscribePro()">Start free trial</button>
+      </div>
+    </div>
+    <div class="paywall-pack">
+      <span style="color:var(--sub);font-size:13px">Credit packs:</span>
+      <button class="pack" onclick="buyCredits(5,9.99)">5 for $9.99</button>
+      <button class="pack" onclick="buyCredits(15,24.99)">15 for $24.99</button>
+      <button class="pack" onclick="buyCredits(40,49.99)">40 for $49.99</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet" id="cart-sheet" onclick="if(event.target===this)hideCart()">
+  <div class="sheet-body">
+    <button class="close" onclick="hideCart()">×</button>
+    <h3>Your cart</h3>
+    <div id="cart-list"></div>
+    <div id="cart-total" style="margin-top:14px;font-family:Fraunces,serif;font-weight:600;font-size:20px;text-align:right"></div>
+    <button class="btn primary" style="width:100%;margin-top:14px" onclick="checkout()">Checkout</button>
+  </div>
+</div>
+
+<script>
+/* ===== 色板（精简版） ===== */
+const PALETTES = {
+  hama:[
+    ['H01','#ffffff','白'],['H02','#f8de4a','黄'],['H03','#fdb900','橘黄'],['H04','#ee7600','橙'],
+    ['H05','#e3262f','红'],['H06','#c11b3c','深红'],['H07','#ff7baf','粉'],['H08','#d56cae','玫瑰'],
+    ['H09','#7e3f98','紫'],['H10','#3b53a4','蓝'],['H11','#1ea0db','天蓝'],['H12','#00b1b0','湖蓝'],
+    ['H13','#00a651','草绿'],['H14','#7cb342','黄绿'],['H15','#a37b4a','棕'],['H16','#5e3a1a','深棕'],
+    ['H17','#000000','黑'],['H18','#9e9e9e','灰'],['H19','#d9c8b4','米色'],['H20','#fce5b8','淡黄'],
+    ['H21','#fbbcb6','肉粉'],['H22','#b6e1c0','薄荷'],['H23','#bcd8ee','浅蓝'],['H24','#e7d4e8','薰衣草']
+  ],
+  perler:[
+    ['P01','#ffffff','白'],['P02','#fff79a','奶油'],['P03','#ffe04b','柠檬'],['P04','#ffb700','金黄'],
+    ['P05','#ff7f00','南瓜橙'],['P06','#ff3d2e','番茄红'],['P07','#c8102e','正红'],['P08','#7a1f2b','酒红'],
+    ['P09','#ff8aae','蜜桃粉'],['P10','#ff4d8d','玫红'],['P11','#aa3a8c','梅紫'],['P12','#5b2a86','深紫'],
+    ['P13','#2e3192','靛蓝'],['P14','#0072ce','宝蓝'],['P15','#00a3e0','晴蓝'],['P16','#7ed7e8','水蓝'],
+    ['P17','#00b388','翠绿'],['P18','#5cb85c','草绿'],['P19','#a4d65e','黄绿'],['P20','#dfe23a','荧光绿'],
+    ['P21','#a0522d','咖啡'],['P22','#5a3a22','深咖'],['P23','#3a2414','摩卡'],['P24','#000000','黑'],
+    ['P25','#4a4a4a','石墨'],['P26','#9b9b9b','灰'],['P27','#d9d9d9','银'],['P28','#f3e9d2','象牙'],
+    ['P29','#ffd1a4','奶橘'],['P30','#ffc1d8','樱花'],['P31','#c8e6c9','薄荷'],['P32','#cfe2f3','天蓝']
+  ]
+};
+
+/* ===== 工具 ===== */
+const $ = id => document.getElementById(id);
+const hex2rgb = h => [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+const dist = (a,b) => (a[0]-b[0])**2+(a[1]-b[1])**2+(a[2]-b[2])**2;
+function nearest(rgb,pal){let best=0,bd=Infinity;for(let i=0;i<pal.length;i++){const d=dist(rgb,pal[i]._rgb);if(d<bd){bd=d;best=i}}return best}
+
+/* ===== 图片处理 ===== */
+let srcImg=null;       // 原图
+let workImg=null;      // 实际进入像素化的图（可能是风格化后的）
+
+/* === AI 风格化 === */
+const STYLES=[
+  {key:'none',label:'Original',emoji:'⬚'},
+  {key:'cartoon',label:'Cartoon',emoji:'✦'},
+  {key:'ghibli',label:'Ghibli',emoji:'❀'},
+  {key:'anime',label:'Anime',emoji:'☆'},
+  {key:'watercolor',label:'Watercolor',emoji:'❍'},
+  {key:'pixel',label:'8-bit',emoji:'▦'},
+  {key:'kawaii',label:'Pastel',emoji:'◐'},
+  {key:'sketch',label:'Sketch',emoji:'✎'},
+];
+let currentStyle='none';
+function renderStyleChips(){
+  const wrap=$('style-chips');wrap.innerHTML='';
+  STYLES.forEach(s=>{
+    const b=document.createElement('button');
+    b.className='opt'+(s.key===currentStyle?' active':'');
+    b.innerHTML=`<span class="e">${s.emoji}</span>${s.label}`;
+    b.onclick=()=>{currentStyle=s.key;renderStyleChips()};
+    wrap.appendChild(b);
+  });
+}
+function toggleApiCfg(){const e=$('api-cfg');e.style.display=e.style.display==='none'?'block':'none'}
+function saveApiCfg(){
+  const cfg={provider:$('api-provider').value,url:$('api-url').value.trim(),key:$('api-key').value.trim()};
+  localStorage.setItem('apicfg',JSON.stringify(cfg));showToast('API settings saved');
+}
+function loadApiCfg(){
+  const c=JSON.parse(localStorage.getItem('apicfg')||'{}');
+  if(c.provider)$('api-provider').value=c.provider;
+  if(c.url)$('api-url').value=c.url;if(c.key)$('api-key').value=c.key;
+  return c;
+}
+
+async function applyStylize(){
+  if(!srcImg)return showToast('Upload an image first');
+  const cfg=loadApiCfg();
+  const status=$('stylize-status');
+  if(currentStyle==='none'){workImg=srcImg;status.textContent='Using original photo';return rerender()}
+
+  if(cfg.provider && cfg.provider!=='local' && cfg.url && cfg.key){
+    status.textContent='Calling '+cfg.provider+'…';
+    try{
+      const blob=await callStyleAPI(cfg,currentStyle,srcImg);
+      const im=new Image();im.onload=()=>{workImg=im;status.textContent='AI style applied · '+cfg.provider;rerender()};
+      im.src=URL.createObjectURL(blob);
+    }catch(err){status.textContent='API failed, fell back to filter — '+err.message;localStylize(currentStyle)}
+    return;
+  }
+  status.textContent='Applying filter…';
+  setTimeout(()=>{localStylize(currentStyle);status.textContent='Style applied · '+currentStyle},50);
+}
+
+function resetStylize(){currentStyle='none';workImg=srcImg;renderStyleChips();$('stylize-status').textContent='';rerender()}
+
+/* 真实 API 调用（多家适配） */
+async function callStyleAPI(cfg,style,img){
+  const prompt={cartoon:'cartoon style, bold outlines, flat colors',ghibli:'studio ghibli style, soft pastel, hand-drawn',
+    anime:'anime style, cel-shaded, vivid',watercolor:'watercolor painting, soft washes',
+    pixel:'8-bit pixel art, retro game',kawaii:'kawaii pastel macaron, soft pink'}[style];
+  // 转 base64
+  const c=document.createElement('canvas');c.width=img.naturalWidth;c.height=img.naturalHeight;
+  c.getContext('2d').drawImage(img,0,0);const b64=c.toDataURL('image/png').split(',')[1];
+
+  if(cfg.provider==='openai'){
+    // DALL·E 3 image edit / variation —— 这里用 image variation
+    const fd=new FormData();fd.append('image',await(await fetch(c.toDataURL())).blob(),'in.png');
+    fd.append('prompt',prompt);fd.append('n','1');fd.append('size','1024x1024');
+    const r=await fetch(cfg.url||'https://api.openai.com/v1/images/edits',{method:'POST',headers:{Authorization:'Bearer '+cfg.key},body:fd});
+    const j=await r.json();if(!j.data)throw new Error(j.error?.message||'no data');
+    return await(await fetch(j.data[0].url)).blob();
+  }
+  if(cfg.provider==='sdwebui'){
+    // AUTOMATIC1111 img2img
+    const r=await fetch((cfg.url||'http://127.0.0.1:7860')+'/sdapi/v1/img2img',{
+      method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+cfg.key},
+      body:JSON.stringify({init_images:[b64],prompt,steps:20,denoising_strength:0.6,cfg_scale:7,width:512,height:512})});
+    const j=await r.json();return await(await fetch('data:image/png;base64,'+j.images[0])).blob();
+  }
+  if(cfg.provider==='jimeng'){
+    // 火山引擎/即梦：endpoint 由用户填，请求体保持通用
+    const r=await fetch(cfg.url,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+cfg.key},
+      body:JSON.stringify({image:b64,prompt,style})});
+    const j=await r.json();const url=j.image_url||j.url||j.data?.[0]?.url;
+    if(!url)throw new Error('响应无图');return await(await fetch(url)).blob();
+  }
+  throw new Error('未知 provider');
+}
+
+/* 本地 Canvas 滤镜（卡通/水彩/像素/吉卜力） */
+function localStylize(style){
+  const c=document.createElement('canvas');const w=Math.min(srcImg.naturalWidth,512);const ratio=w/srcImg.naturalWidth;
+  c.width=w;c.height=Math.round(srcImg.naturalHeight*ratio);
+  const x=c.getContext('2d');
+  // CSS filter 预处理
+  const F={cartoon:'saturate(1.6) contrast(1.4)',ghibli:'saturate(1.2) brightness(1.05) contrast(.95)',
+    anime:'saturate(1.8) contrast(1.5)',watercolor:'saturate(1.1) blur(.6px) brightness(1.05)',
+    pixel:'saturate(1.4) contrast(1.3)',kawaii:'saturate(.85) brightness(1.15)',
+    sketch:'grayscale(1) contrast(1.3)'}[style]||'';
+  x.filter=F;x.drawImage(srcImg,0,0,c.width,c.height);x.filter='none';
+
+  const id=x.getImageData(0,0,c.width,c.height);const d=id.data;
+  // 色调分阶（poster化），不同风格阶数不同
+  const levels={cartoon:5,ghibli:6,anime:4,watercolor:8,pixel:3,kawaii:5,sketch:4}[style]||6;
+  const step=255/(levels-1);
+  for(let i=0;i<d.length;i+=4){
+    d[i]=Math.round(d[i]/step)*step;
+    d[i+1]=Math.round(d[i+1]/step)*step;
+    d[i+2]=Math.round(d[i+2]/step)*step;
+    if(style==='kawaii'){d[i]=Math.min(255,d[i]+20);d[i+2]=Math.min(255,d[i+2]+10)}
+  }
+  x.putImageData(id,0,0);
+  if(style==='cartoon'||style==='anime'||style==='sketch')edgeOverlay(c);
+  const im=new Image();im.onload=()=>{workImg=im;rerender()};im.src=c.toDataURL();
+}
+function edgeOverlay(c){
+  const x=c.getContext('2d');const w=c.width,h=c.height;
+  const src=x.getImageData(0,0,w,h).data;
+  const out=x.getImageData(0,0,w,h);const o=out.data;
+  const gray=i=>0.299*src[i]+0.587*src[i+1]+0.114*src[i+2];
+  for(let y=1;y<h-1;y++)for(let xp=1;xp<w-1;xp++){
+    const i=(y*w+xp)*4;
+    const gx=Math.abs(gray(((y*w)+xp+1)*4)-gray(((y*w)+xp-1)*4));
+    const gy=Math.abs(gray((((y+1)*w)+xp)*4)-gray((((y-1)*w)+xp)*4));
+    if(gx+gy>60){o[i]=0;o[i+1]=0;o[i+2]=0}
+  }
+  x.putImageData(out,0,0);
+}
+
+function handleFile(e){
+  const f=e.target.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{const im=new Image();im.onload=()=>{
+    srcImg=im;workImg=im;
+    $('stylize-panel').style.display='block';
+    $('controls').style.display='block';$('preview').style.display='block';
+    renderStyleChips();loadApiCfg();rerender();
+  };im.src=r.result};
+  r.readAsDataURL(f);
+}
+
+/* ===== AI Chat 入口 ===== */
+function switchMode(m){
+  document.querySelectorAll('.mode-tab').forEach(b=>b.classList.toggle('active',b.dataset.mode===m));
+  $('chat-panel').style.display=m==='chat'?'block':'none';
+  $('photo-panel').style.display=m==='photo'?'block':'none';
+}
+
+const SUGGEST=[
+  'A cute orange cat keychain, pastel palette',
+  'Sunflower wall art, 48×48',
+  'Mushroom magnet, retro 8-bit',
+  'Heart coaster set, valentine red',
+  'Pixel rainbow, 32×32',
+  'Cherry blossom, soft pink',
+];
+
+/* 像素模板库（procedural drawing） */
+const TEMPLATES=[
+  {key:'cat',words:['cat','kitty','kitten','pet','meow'],size:32,
+    palette:['#fbbcb6','#ffb37a','#1c1c1c','#fff','#ff7baf','#3d5a4c'],draw:drawCat},
+  {key:'flower',words:['flower','sunflower','bloom','daisy','floral','botanical'],size:40,
+    palette:['#ffd14a','#a37b4a','#7cb342','#3d5a4c','#fff','#ee7600'],draw:drawFlower},
+  {key:'mushroom',words:['mushroom','toad','shroom','retro','8-bit','mario'],size:32,
+    palette:['#e3262f','#fff','#a37b4a','#5e3a1a','#3d5a4c','#000'],draw:drawMushroom},
+  {key:'heart',words:['heart','love','valentine','romance'],size:32,
+    palette:['#ff4d8d','#b85c3c','#fff','#1c1c1c','#ffc1d8','#ffd14a'],draw:drawHeart},
+  {key:'star',words:['star','night','sky','space','cosmic'],size:32,
+    palette:['#ffd14a','#fff','#3b53a4','#1c1c1c','#7e3f98','#cfe2f3'],draw:drawStar},
+  {key:'cherry',words:['cherry','blossom','sakura','spring','pink'],size:32,
+    palette:['#ffc1d8','#ff7baf','#7cb342','#3d5a4c','#fff','#5e3a1a'],draw:drawCherryBlossom},
+  {key:'rainbow',words:['rainbow','pride','colorful','spectrum'],size:48,
+    palette:['#e3262f','#ee7600','#ffd14a','#7cb342','#3b53a4','#7e3f98','#fff','#cfe2f3'],draw:drawRainbow},
+  {key:'face',words:['smile','face','smiley','emoji','happy'],size:24,
+    palette:['#ffd14a','#1c1c1c','#fff','#ff7baf','#ff7f00','#3d5a4c'],draw:drawSmiley},
+  {key:'fish',words:['fish','ocean','sea','aqua'],size:32,
+    palette:['#ff7f00','#ffd14a','#fff','#1c1c1c','#cfe2f3','#0072ce'],draw:drawFish},
+  {key:'leaf',words:['leaf','plant','green','nature'],size:32,
+    palette:['#3d5a4c','#7cb342','#a4d65e','#5e3a1a','#fff','#1c1c1c'],draw:drawLeaf},
+];
+
+const SIZE_RULES=[
+  {words:['keychain','magnet','badge','small','tiny'],size:16},
+  {words:['coaster','medium'],size:29},
+  {words:['large','wall','poster','big'],size:64},
+];
+
+function pickTemplate(text){
+  const t=text.toLowerCase();
+  let best=TEMPLATES[Math.floor(Math.random()*TEMPLATES.length)];
+  let bestScore=0;
+  for(const tpl of TEMPLATES){
+    let s=0;tpl.words.forEach(w=>{if(t.includes(w))s+=10});
+    if(s>bestScore){bestScore=s;best=tpl}
+  }
+  // 解析尺寸提示
+  let size=best.size;
+  for(const r of SIZE_RULES){if(r.words.some(w=>t.includes(w))){size=r.size;break}}
+  // 解析数字尺寸 e.g. "32x32" "48×48"
+  const m=t.match(/(\d{2,3})\s*[x×]\s*(\d{2,3})/);if(m)size=parseInt(m[1]);
+  // 解析配色提示
+  let pal=best.palette.slice();
+  if(t.includes('pastel'))pal=['#ffc1d8','#fce5b8','#bcd8ee','#e7d4e8','#c8e6c9','#fff'];
+  else if(t.includes('mono')||t.includes('black'))pal=['#1c1c1c','#6b6258','#9b9b9b','#d9d9d9','#f6f1ea','#fff'];
+  else if(t.includes('warm')||t.includes('sunset'))pal=['#7a1f2b','#b85c3c','#ee7600','#ffd14a','#fce5b8','#fff'];
+  return {tpl:best,size,palette:pal};
+}
+
+/* === 程序绘制函数（在 200×200 画布上画像素友好图） === */
+function makeCanvas(){const c=document.createElement('canvas');c.width=240;c.height=240;return c}
+function fillBg(ctx,c){ctx.fillStyle=c;ctx.fillRect(0,0,240,240)}
+function drawCat(ctx,p){fillBg(ctx,p[0]);
+  // 耳朵
+  ctx.fillStyle=p[1];
+  ctx.beginPath();ctx.moveTo(70,90);ctx.lineTo(90,55);ctx.lineTo(105,90);ctx.fill();
+  ctx.beginPath();ctx.moveTo(135,90);ctx.lineTo(150,55);ctx.lineTo(170,90);ctx.fill();
+  // 头
+  ctx.beginPath();ctx.arc(120,135,60,0,Math.PI*2);ctx.fill();
+  // 眼
+  ctx.fillStyle=p[2];
+  ctx.beginPath();ctx.arc(100,130,7,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(140,130,7,0,Math.PI*2);ctx.fill();
+  // 鼻
+  ctx.fillStyle=p[4];
+  ctx.beginPath();ctx.moveTo(120,148);ctx.lineTo(113,156);ctx.lineTo(127,156);ctx.fill();
+  // 嘴
+  ctx.strokeStyle=p[2];ctx.lineWidth=2;
+  ctx.beginPath();ctx.arc(115,165,5,0,Math.PI);ctx.arc(125,165,5,0,Math.PI);ctx.stroke();
+}
+function drawFlower(ctx,p){fillBg(ctx,p[3]);
+  // 花瓣
+  ctx.fillStyle=p[0];
+  for(let i=0;i<8;i++){const a=i*Math.PI/4;
+    const x=120+Math.cos(a)*52,y=120+Math.sin(a)*52;
+    ctx.beginPath();ctx.ellipse(x,y,30,18,a,0,Math.PI*2);ctx.fill();}
+  // 花心
+  ctx.fillStyle=p[1];ctx.beginPath();ctx.arc(120,120,28,0,Math.PI*2);ctx.fill();
+  // 茎
+  ctx.fillStyle=p[2];ctx.fillRect(115,170,10,60);
+  // 叶
+  ctx.beginPath();ctx.ellipse(95,200,20,10,-.4,0,Math.PI*2);ctx.fill();
+}
+function drawMushroom(ctx,p){fillBg(ctx,p[4]);
+  // 茎
+  ctx.fillStyle=p[1];ctx.fillRect(95,140,50,70);
+  // 帽
+  ctx.fillStyle=p[0];
+  ctx.beginPath();ctx.arc(120,130,72,Math.PI,0);ctx.lineTo(192,150);ctx.lineTo(48,150);ctx.fill();
+  // 白点
+  ctx.fillStyle=p[1];
+  [[80,110,12],[150,90,10],[105,75,9],[155,135,11],[95,140,8]].forEach(([x,y,r])=>{
+    ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();});
+  // 眼
+  ctx.fillStyle=p[5];
+  ctx.beginPath();ctx.arc(108,180,4,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(132,180,4,0,Math.PI*2);ctx.fill();
+}
+function drawHeart(ctx,p){fillBg(ctx,p[2]);
+  ctx.fillStyle=p[0];
+  ctx.beginPath();
+  const cx=120,cy=120,s=70;
+  ctx.moveTo(cx,cy+s*.7);
+  ctx.bezierCurveTo(cx-s,cy-s*.3,cx-s*.6,cy-s*.9,cx,cy-s*.3);
+  ctx.bezierCurveTo(cx+s*.6,cy-s*.9,cx+s,cy-s*.3,cx,cy+s*.7);
+  ctx.fill();
+  // 高光
+  ctx.fillStyle=p[2];
+  ctx.beginPath();ctx.ellipse(cx-25,cy-15,12,8,-.5,0,Math.PI*2);ctx.fill();
+}
+function drawStar(ctx,p){fillBg(ctx,p[2]);
+  // 背景小星
+  ctx.fillStyle=p[1];
+  for(let i=0;i<14;i++){const x=Math.random()*240,y=Math.random()*240;
+    ctx.fillRect(x,y,3,3);}
+  // 大星
+  ctx.fillStyle=p[0];
+  ctx.beginPath();
+  for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5;
+    const r=i%2===0?70:32;
+    const x=120+Math.cos(a)*r,y=120+Math.sin(a)*r;
+    if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}
+  ctx.closePath();ctx.fill();
+}
+function drawCherryBlossom(ctx,p){fillBg(ctx,p[4]);
+  // 树枝
+  ctx.strokeStyle=p[5];ctx.lineWidth=8;
+  ctx.beginPath();ctx.moveTo(20,180);ctx.bezierCurveTo(80,160,140,140,220,90);ctx.stroke();
+  // 花朵
+  for(const[x,y,sz]of[[60,170,18],[110,150,22],[160,130,20],[200,100,18],[90,140,16],[145,170,16]]){
+    ctx.fillStyle=p[1];
+    for(let i=0;i<5;i++){const a=i*Math.PI*2/5;
+      ctx.beginPath();ctx.ellipse(x+Math.cos(a)*sz*.5,y+Math.sin(a)*sz*.5,sz*.45,sz*.6,a,0,Math.PI*2);ctx.fill();}
+    ctx.fillStyle=p[0];ctx.beginPath();ctx.arc(x,y,sz*.3,0,Math.PI*2);ctx.fill();
+  }
+}
+function drawRainbow(ctx,p){fillBg(ctx,p[7]);
+  // 7 道彩虹
+  for(let i=0;i<7;i++){
+    ctx.strokeStyle=p[i];ctx.lineWidth=18;
+    ctx.beginPath();ctx.arc(120,200,30+i*18,Math.PI,0);ctx.stroke();
+  }
+  // 云
+  ctx.fillStyle=p[6];
+  [[55,200,28],[185,200,28],[40,210,20],[200,210,20]].forEach(([x,y,r])=>{
+    ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();});
+}
+function drawSmiley(ctx,p){fillBg(ctx,p[2]);
+  ctx.fillStyle=p[0];ctx.beginPath();ctx.arc(120,120,80,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=p[1];
+  ctx.beginPath();ctx.arc(95,105,9,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(145,105,9,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle=p[1];ctx.lineWidth=6;ctx.lineCap='round';
+  ctx.beginPath();ctx.arc(120,130,32,.2*Math.PI,.8*Math.PI);ctx.stroke();
+  // 腮红
+  ctx.fillStyle=p[3];
+  ctx.beginPath();ctx.arc(80,140,8,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(160,140,8,0,Math.PI*2);ctx.fill();
+}
+function drawFish(ctx,p){fillBg(ctx,p[4]);
+  // 身
+  ctx.fillStyle=p[0];
+  ctx.beginPath();ctx.ellipse(110,120,70,40,0,0,Math.PI*2);ctx.fill();
+  // 尾
+  ctx.beginPath();ctx.moveTo(170,120);ctx.lineTo(220,80);ctx.lineTo(220,160);ctx.fill();
+  // 鳍
+  ctx.fillStyle=p[1];ctx.beginPath();ctx.ellipse(110,90,30,12,0,0,Math.PI*2);ctx.fill();
+  // 眼
+  ctx.fillStyle=p[2];ctx.beginPath();ctx.arc(80,115,8,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=p[3];ctx.beginPath();ctx.arc(80,115,4,0,Math.PI*2);ctx.fill();
+  // 泡泡
+  ctx.fillStyle=p[2];
+  [[40,60,10],[60,40,7],[180,50,8]].forEach(([x,y,r])=>{
+    ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.stroke();});
+}
+function drawLeaf(ctx,p){fillBg(ctx,p[4]);
+  ctx.fillStyle=p[0];
+  ctx.beginPath();
+  ctx.moveTo(60,200);
+  ctx.bezierCurveTo(30,120,80,40,180,40);
+  ctx.bezierCurveTo(180,140,120,200,60,200);
+  ctx.fill();
+  // 叶脉
+  ctx.strokeStyle=p[1];ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(60,200);ctx.lineTo(170,50);ctx.stroke();
+  for(let i=0;i<5;i++){const t=.2+i*.15;
+    const x=60+(170-60)*t,y=200-(200-50)*t;
+    ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+25,y-15);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-15,y+10);ctx.stroke();}
+}
+
+function showSuggestions(){
+  const wrap=$('chat-suggest');wrap.innerHTML='';
+  SUGGEST.forEach(s=>{const b=document.createElement('button');b.textContent=s;
+    b.onclick=()=>{$('chat-input').value=s;sendChat()};wrap.appendChild(b);});
+}
+function appendMsg(role,html){
+  const m=document.createElement('div');m.className='msg '+role;m.innerHTML=html;
+  $('chat-stream').appendChild(m);$('chat-stream').scrollTop=99999;return m;
+}
+function appendTyping(){
+  const m=document.createElement('div');m.className='msg ai typing';
+  m.innerHTML='Designing<span class="dots"><span></span><span></span><span></span></span>';
+  $('chat-stream').appendChild(m);$('chat-stream').scrollTop=99999;return m;
+}
+
+function sendChat(){
+  const input=$('chat-input');const text=input.value.trim();if(!text)return;
+  input.value='';
+  appendMsg('me',escapeHtml(text));
+  const typing=appendTyping();
+  setTimeout(()=>{generateFromPrompt(text,typing)},700);
+}
+
+function escapeHtml(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c])}
+
+function generateFromPrompt(text,typingNode){
+  const cfg=loadApiCfg();
+  const pick=pickTemplate(text);
+  // 真 API（如果配了）
+  if(cfg.provider && cfg.provider!=='local' && cfg.url && cfg.key){
+    callTextToImage(cfg,text).then(blob=>{
+      const im=new Image();im.onload=()=>{srcImg=im;workImg=im;onChatGenerated(im,pick,text,typingNode,'AI · '+cfg.provider)};
+      im.src=URL.createObjectURL(blob);
+    }).catch(err=>{console.warn(err);renderTemplate(pick,text,typingNode)});
+    return;
+  }
+  renderTemplate(pick,text,typingNode);
+}
+
+function renderTemplate(pick,text,typingNode){
+  const c=makeCanvas();const ctx=c.getContext('2d');pick.tpl.draw(ctx,pick.palette);
+  const im=new Image();im.onload=()=>{srcImg=im;workImg=im;onChatGenerated(im,pick,text,typingNode,'Built-in template')};
+  im.src=c.toDataURL();
+}
+
+function onChatGenerated(im,pick,text,typingNode,sourceLabel){
+  typingNode.remove();
+  // 自动设尺寸
+  $('size').value=Math.min(80,Math.max(20,pick.size));
+  // 显示控件
+  $('stylize-panel').style.display='block';$('controls').style.display='block';$('preview').style.display='block';
+  renderStyleChips();loadApiCfg();rerender();
+  // AI 回复
+  appendMsg('ai',`Got it — designed a <b>${pick.tpl.key}</b> at <b>${pick.size}×${pick.size}</b>. Source: ${sourceLabel}. Scroll right to tweak palette &amp; size, or click <em>Apply style</em> to remix.`);
+  const stream=$('chat-stream');
+  const result=document.createElement('div');result.className='chat-result';
+  result.innerHTML=`<img src="${im.src}" alt=""><div class="info"><div class="t">Pattern ready</div><div class="d">${pick.size}×${pick.size} · ${pick.palette.length} colors · scroll down for HD download</div></div>`;
+  stream.appendChild(result);stream.scrollTop=99999;
+  // 滚动到 preview
+  setTimeout(()=>{$('preview').scrollIntoView({behavior:'smooth',block:'start'})},300);
+}
+
+async function callTextToImage(cfg,prompt){
+  const fullPrompt=prompt+', simple shapes, bold colors, suitable for pixel art bead pattern, centered subject, plain background, 1024x1024';
+  if(cfg.provider==='openai'){
+    const r=await fetch(cfg.url||'https://api.openai.com/v1/images/generations',{method:'POST',
+      headers:{'Content-Type':'application/json',Authorization:'Bearer '+cfg.key},
+      body:JSON.stringify({model:'dall-e-3',prompt:fullPrompt,n:1,size:'1024x1024'})});
+    const j=await r.json();if(!j.data)throw new Error(j.error?.message||'no data');
+    return await(await fetch(j.data[0].url)).blob();
+  }
+  // 通用 fallback
+  const r=await fetch(cfg.url,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+cfg.key},
+    body:JSON.stringify({prompt:fullPrompt})});
+  const j=await r.json();const url=j.image_url||j.url||j.data?.[0]?.url;
+  if(!url)throw new Error('no image');return await(await fetch(url)).blob();
+}
+
+/* ===== Credits & Paywall ===== */
+function getCredits(){return parseInt(localStorage.getItem('credits')||'0')}
+function setCredits(n){localStorage.setItem('credits',n);renderCredits()}
+function renderCredits(){$('credits-num').textContent=getCredits()}
+function showPaywall(){$('paywall').classList.add('show')}
+function hidePaywall(){$('paywall').classList.remove('show')}
+function buyCredits(n,price){
+  setCredits(getCredits()+n);
+  showToast(`+${n} credits added (mock $${price.toFixed(2)})`);hidePaywall();
+}
+function subscribePro(){
+  setCredits(getCredits()+999);showToast('Pro Studio trial started — unlimited HD');hidePaywall();
+}
+
+function rerender(){
+  if(!srcImg)return;
+  const size=parseInt($('size').value);$('size-val').textContent=`${size}×${size}`;
+  const palKey=$('palette').value;
+  const pal=PALETTES[palKey].map(p=>({code:p[0],hex:p[1],name:p[2],_rgb:hex2rgb(p[1])}));
+  const dither=$('dither').value;
+
+  // 原图（用 workImg 反映风格化结果）
+  const baseImg=workImg||srcImg;
+  const co=$('cv-orig'),ctxo=co.getContext('2d');
+  co.width=size*8;co.height=size*8;
+  ctxo.drawImage(baseImg,0,0,co.width,co.height);
+
+  // 像素化
+  const tmp=document.createElement('canvas');tmp.width=size;tmp.height=size;
+  const tx=tmp.getContext('2d');tx.imageSmoothingEnabled=true;
+  tx.drawImage(baseImg,0,0,size,size);
+  const id=tx.getImageData(0,0,size,size);
+  const data=id.data;
+
+  // 量化
+  const counts={};
+  if(dither==='floyd'){
+    const buf=new Float32Array(data.length);for(let i=0;i<data.length;i++)buf[i]=data[i];
+    for(let y=0;y<size;y++)for(let x=0;x<size;x++){
+      const idx=(y*size+x)*4;
+      const old=[buf[idx],buf[idx+1],buf[idx+2]];
+      const ni=nearest(old,pal);const np=pal[ni]._rgb;
+      data[idx]=np[0];data[idx+1]=np[1];data[idx+2]=np[2];data[idx+3]=255;
+      counts[ni]=(counts[ni]||0)+1;
+      const er=old[0]-np[0],eg=old[1]-np[1],eb=old[2]-np[2];
+      const dif=(dx,dy,k)=>{const j=((y+dy)*size+(x+dx))*4;if(j<0||j>=buf.length)return;buf[j]+=er*k;buf[j+1]+=eg*k;buf[j+2]+=eb*k};
+      dif(1,0,7/16);dif(-1,1,3/16);dif(0,1,5/16);dif(1,1,1/16);
+    }
+  }else{
+    for(let i=0;i<size*size;i++){
+      const idx=i*4;const ni=nearest([data[idx],data[idx+1],data[idx+2]],pal);
+      const np=pal[ni]._rgb;data[idx]=np[0];data[idx+1]=np[1];data[idx+2]=np[2];data[idx+3]=255;
+      counts[ni]=(counts[ni]||0)+1;
+    }
+  }
+  tx.putImageData(id,0,0);
+
+  // 渲染拼豆（带圆点）
+  const cb=$('cv-bead'),ctxb=cb.getContext('2d');
+  const cell=10;cb.width=size*cell;cb.height=size*cell;
+  ctxb.fillStyle='#fafafa';ctxb.fillRect(0,0,cb.width,cb.height);
+  const sd=tx.getImageData(0,0,size,size).data;
+  for(let y=0;y<size;y++)for(let x=0;x<size;x++){
+    const idx=(y*size+x)*4;
+    ctxb.fillStyle=`rgb(${sd[idx]},${sd[idx+1]},${sd[idx+2]})`;
+    ctxb.beginPath();ctxb.arc(x*cell+cell/2,y*cell+cell/2,cell/2-1,0,Math.PI*2);ctxb.fill();
+    ctxb.strokeStyle='rgba(0,0,0,.06)';ctxb.stroke();
+  }
+
+  // Stats + legend
+  const total=size*size;
+  const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  $('stats').innerHTML=`
+    <div class="stat"><div class="v">${total.toLocaleString()}</div><div class="l">Beads</div></div>
+    <div class="stat"><div class="v">${sorted.length}</div><div class="l">Colors</div></div>
+    <div class="stat"><div class="v">${Math.round(total/120)}m</div><div class="l">Est. time</div></div>
+    <div class="stat"><div class="v">${size}×${size}</div><div class="l">Grid</div></div>`;
+  const lg=$('legend');lg.innerHTML='';
+  sorted.forEach(([i,c])=>{
+    const p=pal[i];
+    const el=document.createElement('div');el.className='item';
+    el.innerHTML=`<span class="swatch" style="background:${p.hex}"></span><span>${p.code}·${c}</span>`;
+    lg.appendChild(el);
+  });
+
+  // 缓存最新结果（无水印）用于发布
+  window.__lastWork={dataUrl:cb.toDataURL('image/png'),size,palKey,colors:sorted.length,beads:total};
+  // 在预览上加水印
+  applyWatermark(cb);
+}
+
+function downloadPng(){
+  if(getCredits()<=0){showPaywall();return}
+  // 消耗 1 credit，导出无水印 HD
+  setCredits(getCredits()-1);
+  const src=$('cv-bead');
+  // 重画放大版（4x）无水印
+  const hd=document.createElement('canvas');hd.width=src.width*4;hd.height=src.height*4;
+  const hx=hd.getContext('2d');hx.imageSmoothingEnabled=false;hx.drawImage(src,0,0,hd.width,hd.height);
+  const a=document.createElement('a');a.href=hd.toDataURL('image/png');
+  a.download=`beadlab_${Date.now()}.png`;a.click();
+  showToast(`HD downloaded · ${getCredits()} credits left`);
+}
+function applyWatermark(canvas){
+  const ctx=canvas.getContext('2d');ctx.save();
+  ctx.fillStyle='rgba(28,28,28,.45)';ctx.font='600 14px Inter,sans-serif';
+  ctx.textAlign='right';ctx.textBaseline='bottom';
+  ctx.fillText('BeadLab · Free preview',canvas.width-12,canvas.height-10);
+  ctx.restore();
+}
+
+/* ===== 数据层（localStorage） ===== */
+const DB={
+  feed: JSON.parse(localStorage.getItem('feed')||'null') || seedFeed(),
+  cart: JSON.parse(localStorage.getItem('cart')||'[]'),
+  mine: JSON.parse(localStorage.getItem('mine')||'[]'),
+  save(){localStorage.setItem('feed',JSON.stringify(this.feed));localStorage.setItem('cart',JSON.stringify(this.cart));localStorage.setItem('mine',JSON.stringify(this.mine))}
+};
+function seedFeed(){
+  const samples=[
+    {img:'rainbow.jpg',title:'Biggie Beads Rainbow — wall art',author:'Maya R.',likes:1432},
+    {img:'floral-necklace.jpg',title:'Fancy floral necklace, fuse beads',author:'Theo K.',likes:2189},
+    {img:'bracelets.jpg',title:'Mom &amp; Me bracelets — matching set',author:'Lila S.',likes:987},
+    {img:'cupcake-frame.jpg',title:'Cupcake frame — kitchen series',author:'Jonah W.',likes:3041},
+    {img:'picture-display.jpg',title:'Picture display, 32×48 grid',author:'Iris D.',likes:766},
+    {img:'daisy-card.jpg',title:'Daisy best-mom card · pastel',author:'Sam P.',likes:1502},
+    {img:'floral-bouquet.jpg',title:'Floral bouquet — botanical',author:'Nora F.',likes:612},
+    {img:'spring-garland.jpg',title:'Spring garland, 12-piece',author:'Chloe G.',likes:1908},
+    {img:'photo-frame.jpg',title:'Spring photo frame, 48×72',author:'Avery L.',likes:2456},
+    {img:'beauty1.jpg',title:'Pixel mosaic kit — starter',author:'Riley J.',likes:823},
+    {img:'beauty2.jpg',title:'Geometric coaster set, 4-pack',author:'Quinn B.',likes:1247},
+    {img:'beauty3.jpg',title:'Animal series — keychains',author:'Casey M.',likes:1788},
+    {img:'beauty4.jpg',title:'Zodiac patterns, full series',author:'Emerson T.',likes:3502},
+    {img:'detail1.jpg',title:'Detail study — color theory',author:'Hayden C.',likes:512},
+    {img:'detail2.jpg',title:'Pattern texture, hi-res grid',author:'Jordan K.',likes:982},
+    {img:'detail3.jpg',title:'Macro shot — bead arrangement',author:'Skyler P.',likes:644},
+    {img:'daisy-holder.jpg',title:'Daisy holder — desk décor',author:'Morgan F.',likes:1109},
+  ];
+  return samples.map((s,i)=>({id:'s'+i,...s,thumb:'assets/feed/'+s.img}));
+}
+function placeholderArt(bg,pal,seed=0){
+  // 16x16 pixel grid 占位，带聚类柔化（更像真实拼豆图）
+  const N=16,SZ=320,cell=SZ/N;let cells='';
+  let r=seed*1234567+1;const rnd=()=>{r=(r*9301+49297)%233280;return r/233280};
+  // 简单的「中心物体」效果：靠近中心更可能用前景色
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){
+    const cx=N/2,cy=N/2;
+    const dist=Math.sqrt((x-cx)**2+(y-cy)**2)/(N/2);
+    const useFg=rnd()>(dist*0.7);
+    const idx=useFg?Math.floor(rnd()*Math.min(4,pal.length)):Math.floor(rnd()*pal.length);
+    const c=pal[idx];
+    cells+=`<circle cx='${x*cell+cell/2}' cy='${y*cell+cell/2}' r='${cell/2-1}' fill='${c}'/>`;
+  }
+  const svg=`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${SZ} ${SZ}'><rect width='${SZ}' height='${SZ}' fill='${bg}'/>${cells}</svg>`;
+  return 'data:image/svg+xml;utf8,'+encodeURIComponent(svg);
+}
+
+function renderFeed(){
+  const wrap=$('feed-list');wrap.innerHTML='';
+  DB.feed.forEach(it=>{
+    const card=document.createElement('div');card.className='card';
+    card.innerHTML=`
+      <img class="thumb" src="${it.thumb}" loading="lazy" alt="">
+      <div class="meta">
+        <div class="title">${it.title}</div>
+        <div class="row"><span class="author"><span class="avatar"></span>${it.author}</span>
+        <span class="heart">♡ ${it.likes>=1000?(it.likes/1000).toFixed(1)+'k':it.likes}</span></div>
+      </div>`;
+    card.onclick=()=>showToast('Opening: '+it.title);
+    wrap.appendChild(card);
+  });
+}
+
+function renderMine(){
+  const wrap=$('my-list');wrap.innerHTML='';
+  if(!DB.mine.length){wrap.innerHTML='<div class="empty">No patterns yet — upload a photo to start.</div>';}
+  DB.mine.forEach(it=>{
+    const card=document.createElement('div');card.className='card';
+    card.innerHTML=`<img class="thumb" src="${it.thumb}" alt="">
+      <div class="meta"><div class="title">${it.title}</div>
+      <div class="row"><span>${it.size}×${it.size} · ${it.colors} colors</span><span class="heart">♡ ${it.likes}</span></div></div>`;
+    wrap.appendChild(card);
+  });
+  $('me-works').textContent=DB.mine.length;
+  $('me-likes').textContent=DB.mine.reduce((s,x)=>s+x.likes,0);
+  $('me-orders').textContent=DB.cart.length;
+}
+
+function publishWork(){
+  if(!window.__lastWork)return showToast('Generate a pattern first');
+  const w=window.__lastWork;
+  const item={id:'m'+Date.now(),title:'My pattern #'+(DB.mine.length+1),author:'Avery Chen',likes:Math.floor(Math.random()*40),
+    thumb:w.dataUrl,size:w.size,colors:w.colors};
+  DB.mine.unshift(item);DB.feed.unshift({...item,h:200});DB.save();
+  showToast('Shared to community');renderFeed();renderMine();
+}
+
+/* ===== 商城 ===== */
+function renderShop(){
+  const wrap=$('shop-list');wrap.innerHTML='';
+  const skus=[
+    {img:'bead-bags-6000.jpg',name:'Bead Bag · 6,000ct',desc:'Single color · 5mm fuse',price:14.99},
+    {img:'bead-bags-1000.png',name:'Bead Bag · 1,000ct',desc:'Single color · 5mm fuse',price:3.99},
+    {img:'beads-by-color.jpg',name:'Beads by Color',desc:'Pick your shade · 1,000-12,000ct',price:8.00},
+    {img:'pinks.jpg',name:'Pinks Multi-Mix',desc:'5 shades · 1,000ct each',price:18.00},
+    {img:'pegboards.png',name:'Pegboard Set',desc:'Square, hex &amp; circle shapes',price:9.00},
+    {img:'tools.jpg',name:'Tools &amp; Accessories',desc:'Tweezers, paper, iron mat',price:12.00},
+    {img:'storage.png',name:'Bead Storage',desc:'Stackable trays · 24 cells',price:16.00},
+    {img:'activity-kits.png',name:'Activity Kit',desc:'Beginner kit · all included',price:22.00},
+  ];
+  skus.forEach(s=>{
+    const sku=document.createElement('div');sku.className='sku';
+    sku.innerHTML=`
+      <div class="sku-thumb"><img src="assets/shop/${s.img}" loading="lazy" alt=""></div>
+      <div class="info">
+        <div class="name">${s.name}</div>
+        <div class="desc">${s.desc}</div>
+        <div class="bot">
+          <div class="price">$${s.price.toFixed(2)}</div>
+          <button class="add" onclick="event.stopPropagation();addCart('${s.name}',${s.price})">Add</button>
+        </div>
+      </div>`;
+    wrap.appendChild(sku);
+  });
+}
+function addCart(name,price){DB.cart.push({name,price,qty:1});DB.save();updateCartBadge();showToast('Added to cart')}
+function addAllToCart(){
+  if(!window.__lastWork)return showToast('Generate a pattern first');
+  DB.cart.push({name:'Custom bead kit (auto-matched)',price:24.00,qty:1});DB.save();updateCartBadge();showToast('Bead kit added')
+}
+function updateCartBadge(){const b=$('cart-badge');if(DB.cart.length){b.textContent=DB.cart.length;b.style.display='inline-block'}else{b.style.display='none'}}
+function showCart(){
+  const list=$('cart-list');list.innerHTML='';
+  if(!DB.cart.length){list.innerHTML='<div class="empty">Your cart is empty.</div>';$('cart-total').textContent='';}
+  let total=0;
+  DB.cart.forEach((it,i)=>{
+    total+=it.price*it.qty;
+    const row=document.createElement('div');row.style='display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--line);font-size:14px';
+    row.innerHTML=`<div><div style="font-weight:600">${it.name}</div><div style="color:var(--sub);font-size:12px;margin-top:2px">Qty ${it.qty}</div></div>
+    <div style="display:flex;align-items:center;gap:12px"><span style="font-family:Fraunces,serif;font-weight:600">$${(it.price*it.qty).toFixed(2)}</span><button onclick="rmCart(${i})" style="color:var(--sub);font-size:12px">Remove</button></div>`;
+    list.appendChild(row);
+  });
+  if(DB.cart.length)$('cart-total').textContent='Total  $'+total.toFixed(2);
+  $('cart-sheet').classList.add('show');
+}
+function hideCart(){$('cart-sheet').classList.remove('show')}
+function rmCart(i){DB.cart.splice(i,1);DB.save();updateCartBadge();showCart()}
+function checkout(){
+  if(!DB.cart.length)return showToast('Cart is empty');
+  // 每件商品赠 5 credits（核心闭环：买豆子 = 解锁 HD 导出）
+  const granted=DB.cart.length*5;setCredits(getCredits()+granted);
+  showToast(`Order placed · +${granted} HD credits unlocked`);
+  DB.cart=[];DB.save();updateCartBadge();hideCart();renderMine();
+}
+
+/* ===== Tab ===== */
+function switchTab(t){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  $('page-'+t).classList.add('active');
+  document.querySelectorAll('.nav button[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));
+  if(t==='shop')renderShop();if(t==='me')renderMine();if(t==='feed')renderFeed();
+  window.scrollTo(0,0);
+}
+
+function showToast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1600)}
+
+/* ===== Init ===== */
+renderFeed();updateCartBadge();renderCredits();
+// 首次进入聊天面板的欢迎语
+showSuggestions();
+appendMsg('ai','Hey 👋 — what would you like to make today? Tell me the subject (a pet, flower, mood…), the use (keychain, coaster, wall art) and any color vibe. Or pick a starter below.');
+</script>
+</body>
+</html>

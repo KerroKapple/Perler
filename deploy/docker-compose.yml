@@ -1,0 +1,22 @@
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: beadlab-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      BEADLAB_DOMAIN: ${BEADLAB_DOMAIN:?need BEADLAB_DOMAIN env (e.g. beadlab.example.com)}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ../:/srv/beadlab:ro
+      - caddy_data:/data
+      - caddy_config:/config
+      - caddy_logs:/var/log/caddy
+
+volumes:
+  caddy_data:
+  caddy_config:
+  caddy_logs:
