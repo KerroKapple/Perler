@@ -41,8 +41,9 @@ export function buildPdfSpec(pattern) {
   const { size, grid, palette, title } = pattern;
   const counts = new Array(palette.length).fill(0);
   for (const idx of grid) counts[idx]++;
+  const total = grid.length;
   const entries = palette
-    .map((hex, i) => ({ code: 'C' + (i + 1), hex, count: counts[i] }))
+    .map((hex, i) => ({ code: 'C' + (i + 1), hex, count: counts[i], percent: Math.round((counts[i] / total) * 1000) / 10 }))
     .sort((a, b) => b.count - a.count);
   return {
     title,

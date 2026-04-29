@@ -24,6 +24,7 @@ describe('buildPdfSpec — Print-PDF 规格构建', () => {
       code: 'C1',
       hex: '#ff0000',
       count: 32 * 32,
+      percent: 100,
     });
     expect(spec.totalBeads).toBe(32 * 32);
   });
@@ -81,5 +82,22 @@ describe('buildPdfSpec — Print-PDF 规格构建', () => {
     expect(gridPages[1].region).toEqual({ row: 0, col: 48, rows: 48, cols: 48 });
     expect(gridPages[2].region).toEqual({ row: 48, col: 0, rows: 48, cols: 48 });
     expect(gridPages[3].region).toEqual({ row: 48, col: 48, rows: 48, cols: 48 });
+  });
+
+  it('legend entries include percent of total beads (rounded to 1 decimal)', () => {
+    const grid = [
+      0, 0, 0, 0,
+      0, 0, 0, 0,
+      0, 0, 1, 1,
+      1, 1, 1, 2,
+    ];
+    const spec = buildPdfSpec({
+      size: 4, grid, palette: ['#aaa','#bbb','#ccc'], title: 't', author: 'a',
+    });
+    const ents = spec.pages.find(p => p.kind === 'legend').entries;
+    // 10/16=62.5, 5/16=31.25→31.3 (1 decimal), 1/16=6.25→6.3 (1 decimal)
+    expect(ents[0].percent).toBe(62.5);
+    expect(ents[1].percent).toBe(31.3);
+    expect(ents[2].percent).toBe(6.3);
   });
 });
