@@ -204,6 +204,68 @@ img{display:block;max-width:100%}
 .empty{text-align:center;color:var(--sub);padding:60px 0;font-size:14px}
 .section-title{font-family:'Fraunces',serif;font-size:24px;font-weight:600;margin:32px 0 16px}
 
+/* === Create page editorial modules === */
+.editorial-block{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:14px}
+.editorial-block .eyebrow{font-size:10px;font-weight:600;color:var(--primary);text-transform:uppercase;letter-spacing:.18em;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.editorial-block .eyebrow::before{content:'';width:24px;height:1px;background:var(--primary)}
+.editorial-block h3{font-family:'Fraunces',serif;font-size:20px;font-weight:600;line-height:1.2;letter-spacing:-.015em;margin-bottom:14px}
+.editorial-block .lede{color:var(--sub);font-size:13px;line-height:1.55;margin-bottom:16px}
+
+/* Process flow — numbered steps */
+.flow-steps{display:flex;flex-direction:column;gap:0;position:relative}
+.flow-step{display:flex;gap:14px;padding:14px 0;align-items:flex-start;position:relative}
+.flow-step + .flow-step{border-top:1px dashed var(--line)}
+.flow-step .num{flex:0 0 auto;width:34px;height:34px;border-radius:50%;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:600;font-size:15px}
+.flow-step .num.accent{background:var(--primary)}
+.flow-step .body{flex:1;min-width:0}
+.flow-step .body .t{font-family:'Fraunces',serif;font-weight:600;font-size:15px;line-height:1.3}
+.flow-step .body .d{color:var(--sub);font-size:12px;margin-top:4px;line-height:1.5}
+.flow-step .icon-pill{width:28px;height:28px;border-radius:8px;background:#faf6ef;color:var(--ink);display:inline-flex;align-items:center;justify-content:center;margin-left:auto;flex:0 0 auto;font-size:14px}
+
+/* Quick templates — project sizes */
+.template-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.template-card{position:relative;background:#fdfbf7;border:1px solid var(--line);border-radius:10px;padding:14px;cursor:pointer;transition:all .15s;overflow:hidden}
+.template-card:hover{border-color:var(--ink);transform:translateY(-2px);box-shadow:var(--shadow)}
+.template-card .tc-emoji{font-size:22px;margin-bottom:6px;display:inline-block}
+.template-card .tc-name{font-family:'Fraunces',serif;font-weight:600;font-size:14px;line-height:1.2}
+.template-card .tc-meta{color:var(--sub);font-size:11px;margin-top:4px}
+.template-card .tc-size{position:absolute;top:10px;right:10px;font-size:10px;font-weight:600;color:var(--primary);background:#fdf1ec;padding:3px 8px;border-radius:999px;letter-spacing:.04em}
+
+/* Sample showcase — "made by makers" */
+.sample-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
+.sample-strip .ss-card{cursor:pointer;border-radius:8px;overflow:hidden;background:#faf6ef;position:relative;aspect-ratio:1/1}
+.sample-strip .ss-card img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s}
+.sample-strip .ss-card:hover img{transform:scale(1.05)}
+.sample-strip .ss-card .ss-badge{position:absolute;bottom:6px;left:6px;background:rgba(28,28,28,.85);color:#fff;font-size:10px;padding:2px 6px;border-radius:4px;font-weight:600;letter-spacing:.04em}
+.sample-cta{margin-top:12px;text-align:center;color:var(--sub);font-size:12px}
+.sample-cta a{color:var(--ink);text-decoration:underline;cursor:pointer;font-weight:500}
+
+/* Live stats */
+.live-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.live-stats .ls{padding:14px;background:#faf6ef;border-radius:10px;text-align:center}
+.live-stats .ls .v{font-family:'Fraunces',serif;font-size:24px;font-weight:600;line-height:1}
+.live-stats .ls .l{font-size:10px;color:var(--sub);text-transform:uppercase;letter-spacing:.1em;margin-top:6px}
+.live-stats .ls .pulse{display:inline-block;width:6px;height:6px;border-radius:50%;background:#22c55e;margin-right:4px;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+
+/* Trending prompts */
+.prompt-list{display:flex;flex-direction:column;gap:8px}
+.prompt-row{display:flex;gap:10px;padding:10px 12px;border-radius:10px;background:#fdfbf7;border:1px solid var(--line);cursor:pointer;align-items:center;transition:all .15s}
+.prompt-row:hover{border-color:var(--ink);background:#fff}
+.prompt-row .pr-quote{font-style:italic;font-family:'Fraunces',serif;font-size:13px;line-height:1.4;color:var(--ink);flex:1}
+.prompt-row .pr-meta{font-size:10px;color:var(--sub);text-transform:uppercase;letter-spacing:.08em;flex:0 0 auto}
+
+/* Continue editing */
+.continue-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.continue-card{background:#fdfbf7;border:1px solid var(--line);border-radius:10px;overflow:hidden;cursor:pointer;display:flex;align-items:center;gap:10px;padding:8px;transition:all .15s}
+.continue-card:hover{border-color:var(--ink)}
+.continue-card img{width:54px;height:54px;border-radius:6px;object-fit:cover;flex:0 0 auto}
+.continue-card .cc-name{font-weight:600;font-size:13px;line-height:1.2}
+.continue-card .cc-meta{color:var(--sub);font-size:11px;margin-top:3px}
+
+/* Hide editorial blocks once user has an image to work with */
+.upload-grid.has-image .editorial-block{display:none}
+
 /* Detail modal */
 .detail-body{background:#fff;width:100%;max-width:1100px;border-radius:16px;max-height:92vh;overflow:hidden;position:relative;animation:msgIn .25s ease-out}
 .detail-body .close{position:absolute;top:14px;right:18px;color:#fff;font-size:30px;line-height:1;cursor:pointer;background:rgba(0,0,0,.4);border:none;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:5}
@@ -305,8 +367,48 @@ img{display:block;max-width:100%}
     <h2 class="page-hero">Turn any photo<br><em style="color:var(--primary);font-style:italic">into a bead pattern.</em></h2>
     <p class="page-sub">Upload → stylize with AI → generate a printable pattern with palette &amp; bead count.</p>
 
-    <div class="upload-grid">
+    <div class="upload-grid" id="upload-grid">
     <div class="upload-left">
+
+    <!-- Editorial: Quick start templates -->
+    <div class="editorial-block">
+      <div class="eyebrow">Quick start</div>
+      <h3>Pick a project size to begin.</h3>
+      <p class="lede">Each template pre-sets the grid &amp; pegboard. You can still tweak everything later.</p>
+      <div class="template-grid">
+        <div class="template-card" onclick="useTemplate(16,'Keychain')">
+          <span class="tc-size">16×16</span>
+          <span class="tc-emoji">🔑</span>
+          <div class="tc-name">Keychain</div>
+          <div class="tc-meta">~256 beads · 30 min · 4–5 colors</div>
+        </div>
+        <div class="template-card" onclick="useTemplate(24,'Magnet')">
+          <span class="tc-size">24×24</span>
+          <span class="tc-emoji">🧲</span>
+          <div class="tc-name">Magnet</div>
+          <div class="tc-meta">~576 beads · 1 hr · 5–6 colors</div>
+        </div>
+        <div class="template-card" onclick="useTemplate(29,'Coaster')">
+          <span class="tc-size">29×29</span>
+          <span class="tc-emoji">☕</span>
+          <div class="tc-name">Coaster</div>
+          <div class="tc-meta">~841 beads · 1.5 hr · 6 colors</div>
+        </div>
+        <div class="template-card" onclick="useTemplate(48,'Wall art')">
+          <span class="tc-size">48×48</span>
+          <span class="tc-emoji">🖼</span>
+          <div class="tc-name">Wall art</div>
+          <div class="tc-meta">~2,304 beads · 4 hr · 6–8 colors</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Editorial: Continue editing -->
+    <div class="editorial-block" id="continue-block" style="display:none">
+      <div class="eyebrow">Pick up where you left off</div>
+      <h3>Continue editing.</h3>
+      <div class="continue-grid" id="continue-list"></div>
+    </div>
 
     <!-- Mode switcher: Chat with AI or Upload -->
     <div class="mode-switch">
@@ -350,6 +452,102 @@ img{display:block;max-width:100%}
     </div><!-- /.upload-left -->
 
     <div class="upload-right">
+
+    <!-- Editorial: How it works flow -->
+    <div class="editorial-block">
+      <div class="eyebrow">How it works</div>
+      <h3>From idea<br>to finished pattern<br>in three steps.</h3>
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="num">1</div>
+          <div class="body">
+            <div class="t">Describe or upload</div>
+            <div class="d">Tell our AI what you want, or drop a photo. Pets, flowers, retro icons — anything works.</div>
+          </div>
+          <div class="icon-pill" title="Upload">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="num">2</div>
+          <div class="body">
+            <div class="t">Stylize with AI</div>
+            <div class="d">Pick a vibe — Cartoon, Ghibli, 8-bit, Watercolor — and we'll re-render it for bead-friendly colors.</div>
+          </div>
+          <div class="icon-pill" title="Stylize">✦</div>
+        </div>
+        <div class="flow-step">
+          <div class="num accent">3</div>
+          <div class="body">
+            <div class="t">Print &amp; make it real</div>
+            <div class="d">Download a print-ready PDF, or order a matched bead kit. Free with any kit purchase.</div>
+          </div>
+          <div class="icon-pill" title="Print">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Editorial: Made by makers (sample showcase) -->
+    <div class="editorial-block">
+      <div class="eyebrow">Made by makers</div>
+      <h3>What others are creating.</h3>
+      <div class="sample-strip">
+        <div class="ss-card" onclick="switchTab('feed')">
+          <img src="assets/feed/beauty4.jpg" alt="" loading="lazy">
+          <span class="ss-badge">32×32 · 6 colors</span>
+        </div>
+        <div class="ss-card" onclick="switchTab('feed')">
+          <img src="assets/feed/floral-bouquet.jpg" alt="" loading="lazy">
+          <span class="ss-badge">48×48 · 8 colors</span>
+        </div>
+        <div class="ss-card" onclick="switchTab('feed')">
+          <img src="assets/feed/bracelets.jpg" alt="" loading="lazy">
+          <span class="ss-badge">16×16 · 5 colors</span>
+        </div>
+      </div>
+      <div class="sample-cta">
+        Inspired? <a onclick="switchTab('feed')">Browse the gallery →</a>
+      </div>
+    </div>
+
+    <!-- Editorial: Live stats -->
+    <div class="editorial-block">
+      <div class="eyebrow"><span style="display:inline-flex;align-items:center"><span class="ls-pulse" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#22c55e;margin-right:6px;animation:pulse 1.6s ease-in-out infinite"></span>Live</span></div>
+      <h3>The community<br>right now.</h3>
+      <div class="live-stats">
+        <div class="ls"><div class="v" id="stat-today">1,247</div><div class="l">Patterns today</div></div>
+        <div class="ls"><div class="v" id="stat-makers">3,892</div><div class="l">Makers online</div></div>
+        <div class="ls"><div class="v" id="stat-beads">2.4M</div><div class="l">Beads sold</div></div>
+        <div class="ls"><div class="v" id="stat-rating">4.9★</div><div class="l">Avg rating</div></div>
+      </div>
+    </div>
+
+    <!-- Editorial: Trending prompts -->
+    <div class="editorial-block">
+      <div class="eyebrow">Trending prompts</div>
+      <h3>Try one of these.</h3>
+      <div class="prompt-list">
+        <div class="prompt-row" onclick="useTrendingPrompt('a sleeping fox curled up, autumn palette, 32x32')">
+          <span class="pr-quote">"a sleeping fox curled up, autumn palette, 32×32"</span>
+          <span class="pr-meta">+412</span>
+        </div>
+        <div class="prompt-row" onclick="useTrendingPrompt('vintage Polaroid camera 8-bit, 24x24 magnet')">
+          <span class="pr-quote">"vintage Polaroid camera 8-bit, 24×24 magnet"</span>
+          <span class="pr-meta">+318</span>
+        </div>
+        <div class="prompt-row" onclick="useTrendingPrompt('lavender sprig botanical, 48x48 wall art')">
+          <span class="pr-quote">"lavender sprig botanical, 48×48 wall art"</span>
+          <span class="pr-meta">+267</span>
+        </div>
+        <div class="prompt-row" onclick="useTrendingPrompt('retro arcade controller, 32x32 keychain')">
+          <span class="pr-quote">"retro arcade controller, 32×32 keychain"</span>
+          <span class="pr-meta">+189</span>
+        </div>
+      </div>
+    </div>
+
     <!-- AI Stylize -->
     <div class="controls" id="stylize-panel" style="display:none">
       <h4>① Stylize <button onclick="toggleApiCfg()" style="font-size:11px;color:var(--sub);font-weight:500;text-transform:uppercase;letter-spacing:.08em">API settings</button></h4>
@@ -742,6 +940,7 @@ function handleFile(e){
     $('stylize-panel').style.display='block';
     $('controls').style.display='block';$('preview').style.display='block';
     renderStyleChips();loadApiCfg();rerender();
+    setUploadHasImage(true);
   };im.src=r.result};
   r.readAsDataURL(f);
 }
@@ -751,6 +950,44 @@ function switchMode(m){
   document.querySelectorAll('.mode-tab').forEach(b=>b.classList.toggle('active',b.dataset.mode===m));
   $('chat-panel').style.display=m==='chat'?'block':'none';
   $('photo-panel').style.display=m==='photo'?'block':'none';
+}
+
+/* === Editorial: templates + trending + continue editing + stats === */
+function useTemplate(size,name){
+  $('size').value=size;
+  switchTab('upload');switchMode('chat');
+  const input=$('chat-input');
+  input.value=`A ${name.toLowerCase()} design — surprise me, ${size}×${size}`;
+  input.focus();showToast(`Template loaded: ${name} ${size}×${size}`);
+}
+function useTrendingPrompt(p){
+  switchTab('upload');switchMode('chat');
+  const input=$('chat-input');
+  input.value=p;sendChat();
+}
+function renderContinueBlock(){
+  if(!DB.mine||!DB.mine.length)return;
+  $('continue-block').style.display='block';
+  const wrap=$('continue-list');wrap.innerHTML='';
+  DB.mine.slice(0,4).forEach(it=>{
+    const c=document.createElement('div');c.className='continue-card';
+    c.innerHTML=`<img src="${it.thumb}" alt=""><div style="min-width:0;flex:1"><div class="cc-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${it.title}</div><div class="cc-meta">${it.size}×${it.size} · ${it.colors} colors</div></div>`;
+    c.onclick=()=>showToast('Loading "'+it.title+'" (demo)');
+    wrap.appendChild(c);
+  });
+}
+function animateLiveStats(){
+  // 每隔 5-12s 在小范围内跳动，制造"活的"感觉
+  const tweak=(id,base,delta,suffix='')=>{
+    const v=base+Math.floor((Math.random()-.5)*delta*2);
+    const el=$(id);if(el)el.textContent=v.toLocaleString()+suffix;
+  };
+  setInterval(()=>tweak('stat-today',1247,8),7000);
+  setInterval(()=>tweak('stat-makers',3892,40),5000);
+}
+function setUploadHasImage(yes){
+  const g=$('upload-grid');if(!g)return;
+  g.classList.toggle('has-image',!!yes);
 }
 
 const SUGGEST=[
@@ -1006,6 +1243,7 @@ function onChatGenerated(im,pick,text,typingNode,sourceLabel){
   $('size').value=Math.min(80,Math.max(20,pick.size));
   // 显示控件
   $('stylize-panel').style.display='block';$('controls').style.display='block';$('preview').style.display='block';
+  setUploadHasImage(true);
   renderStyleChips();loadApiCfg();rerender();
   // AI 回复
   appendMsg('ai',`Got it — designed a <b>${pick.tpl.key}</b> at <b>${pick.size}×${pick.size}</b>. Source: ${sourceLabel}. Scroll right to tweak palette &amp; size, or click <em>Apply style</em> to remix.`);
@@ -1512,7 +1750,7 @@ function appendChatMessageFromRemix(it){
 }
 
 /* ===== Init ===== */
-renderFeed();updateCartBadge();renderCredits();
+renderFeed();updateCartBadge();renderCredits();renderContinueBlock();animateLiveStats();
 // 首次进入聊天面板的欢迎语
 showSuggestions();
 appendMsg('ai','Hey 👋 — what would you like to make today? Tell me the subject (a pet, flower, mood…), the use (keychain, coaster, wall art) and any color vibe. Or pick a starter below.');
@@ -1524,6 +1762,7 @@ Object.assign(window, {
   remixThis, resetStylize, rmCart, saveApiCfg, sendChat, setChip,
   sharePattern, showCart, showPaywall, subscribePro, switchMode,
   switchTab, toggleApiCfg, toggleLike, toggleSave,
+  useTemplate, useTrendingPrompt,
 });
 </script>
 </body>
