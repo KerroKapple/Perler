@@ -53,4 +53,20 @@ describe('drawPdf — render spec into jsPDF instance', () => {
     const titleCalls = fake.calls.text.filter(c => c[0] === 'My Pattern');
     expect(titleCalls).toHaveLength(1);
   });
+
+  it('emits the title on the first GRID page even if a legend page is first', () => {
+    const fake = makeFakePdf();
+    const Ctor = vi.fn(() => fake.instance);
+    drawPdf({
+      title: 'Legend-First Pattern',
+      pageSize: 'letter',
+      totalBeads: 1,
+      pages: [
+        { kind: 'legend', entries: [{ code: 'C1', hex: '#000', count: 1, percent: 100 }] },
+        { kind: 'grid', size: { rows: 1, cols: 1 }, rulers: [0] },
+      ],
+    }, Ctor);
+    const titleCalls = fake.calls.text.filter(c => c[0] === 'Legend-First Pattern');
+    expect(titleCalls).toHaveLength(1);
+  });
 });
