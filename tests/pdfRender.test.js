@@ -22,7 +22,7 @@ function makeFakePdf() {
 describe('drawPdf — render spec into jsPDF instance', () => {
   it('returns the output blob and adds 1 page-break per spec page after the first', () => {
     const fake = makeFakePdf();
-    const Ctor = vi.fn(() => fake.instance);
+    const Ctor = vi.fn(function () { return fake.instance; });
 
     const spec = {
       title: 'Hello',
@@ -43,7 +43,7 @@ describe('drawPdf — render spec into jsPDF instance', () => {
 
   it('writes the title once on the first grid page', () => {
     const fake = makeFakePdf();
-    const Ctor = vi.fn(() => fake.instance);
+    const Ctor = vi.fn(function () { return fake.instance; });
     drawPdf({
       title: 'My Pattern',
       pageSize: 'letter',
@@ -56,7 +56,7 @@ describe('drawPdf — render spec into jsPDF instance', () => {
 
   it('emits the title on the first GRID page even if a legend page is first', () => {
     const fake = makeFakePdf();
-    const Ctor = vi.fn(() => fake.instance);
+    const Ctor = vi.fn(function () { return fake.instance; });
     drawPdf({
       title: 'Legend-First Pattern',
       pageSize: 'letter',
